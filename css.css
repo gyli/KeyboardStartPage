@@ -15,7 +15,9 @@ ul {
 h1,h2,h3,h4,h5,h6 {
     font-size: 100%;
     font-weight: 400
-},button,input {
+}
+
+button,input {
       font-family: inherit;
       font-size: inherit;
       font-style: inherit;
@@ -28,11 +30,11 @@ a {
 }
 
 html {
-    background: url(images/bg.gif)
+    background: url('img/bg.gif')
 }
 
 body {
-    font: 12px 'Microsoft YaHei',SimSun,Helvetica,Tahoma,Arial,sans-serif!important;
+    font: 12px "Courier New", Courier, monospace!important;
     color: #666
 }
 
@@ -47,6 +49,7 @@ body {
 }
 
 #main li {
+    /*TODO: set to the same width*/
     position: relative;
     display: inline;
     margin-right: 1em;
@@ -95,9 +98,17 @@ body {
 }
 
 #main li div {
-    position: absolute;
-    left: 0;
-    top: 0
+
+}
+
+/*KeyboardStartPage*/
+.btn .edit
+{
+    background-image:url('img/edit-icon.png');
+}
+.btn .delete
+{
+    background-image:url('img/delete-icon.png');
 }
 
 #main div a {

@@ -1,9 +1,10 @@
-chrome.app.runtime.onLaunched.addListener(function() {
-    chrome.app.window.create('index.html', {
-        id: "helloWorldSyncID",
-        innerBounds: {
-            width: 500,
-            height: 415
-        }
-    });
-});
+
+// Open setting page
+function SettingPopup(btnName) {
+    chrome.windows.create({url : "popup.html?btn="+btnName,type: "popup", height: 600, width:600});
+};
+
+// Open link
+function jumpToLink(btnName) {
+    chrome.windows.create({url : "popup.html?btn="+btnName,type: "popup", height: 600, width:600});
+};

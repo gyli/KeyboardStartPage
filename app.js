@@ -3,6 +3,8 @@
     for(var i=0; i<btn.length; i++) {
         var btnName = btn.charAt(i);
         var btnId = "LI_" + btnName;
+
+        // edit button
         var editBtn = document.getElementById(btnId).getElementsByClassName("a1 edit")[0];
         editBtn.addEventListener('click', function (event) {
             // Prepare the button name
@@ -14,6 +16,7 @@
             });
         });
 
+        // delete button
         var deleteBtn = document.getElementById(btnId).getElementsByClassName("a1 delete")[0];
         deleteBtn.addEventListener('click', function () {
             chrome.runtime.getBackgroundPage(function(eventPage) {
@@ -21,6 +24,7 @@
             });
         });
 
+        // click the button
         var clickBtn = document.getElementById(btnId);
         clickBtn.addEventListener('click', function () {
             chrome.runtime.getBackgroundPage(function(eventPage) {

@@ -17,11 +17,8 @@ function getQueryVariable(variable) {
     }
 }
 
-function log(str) {
-    logarea.value=str+"\n"+logarea.value;
-}
-
 // Get a new link
+// TODO: close current page and maybe refresh the main page?
 form.addEventListener('submit', function(event) {
     // Get input link
     var newLink=input.value;
@@ -32,10 +29,17 @@ form.addEventListener('submit', function(event) {
     storeLink[storeLinkKey] = newLink;
     // Store it
     chrome.storage.sync.set(storeLink, function() {
+        // for debug
         log("setting "+storeLinkKey+" to "+newLink);
     });
     event.preventDefault();
 });
+
+// below codes are only for debugging
+
+function log(str) {
+    logarea.value=str+"\n"+logarea.value;
+}
 
 function valueChanged(newValue) {
     output.innerText = newValue;
@@ -61,5 +65,3 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 });
 
 chrome.storage.sync.get(window.btn, function(val) {valueChanged(val[window.btn])});
-
-console.log(chrome.storage.sync.get(window.btn, function(val){}));

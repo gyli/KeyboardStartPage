@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "Keyboard Start Page",
+  "description": "A mini start page controlled by keyboard shortcut.",
+  "version": "0.1",
+  "minimum_chrome_version": "33",
+  "permissions": [ "tabs", "storage" ],
+  "app": {
+    "background": {
+      "scripts": ["main.js"]
+    }
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  }
+}

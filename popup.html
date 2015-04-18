@@ -3,15 +3,22 @@
 <head lang="en">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>Modify your link</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="popup.css">
+    <!--<link href="css/bootstrap.min.css" rel="stylesheet">-->
 </head>
 <body>
-    <div id="output"></div>
-    <form class="form-group">
-        <label for="newLink">Input the link for this key: </label>
-        <input name="newLink" id="newLink" value="http://" type="url" class="form-control" />
-        <input type="submit" value="submit" class="btn btn-success"/>
-    </form>
+    <div class="tab-pane fade in active" id="bootstrap-style-demo">
+        <form action="" method="post" class="bootstrap-frm">
+            <h1>
+                Change Link
+                <span id="output"></span>
+            </h1>
+            <p>
+                <input id="newLink" type="text" name="newLink" placeholder="URL for this key" value="http://" />
+                <input type="submit" class="button" value="Submit" />
+                <label id="warning" for="newLink">&nbsp;</label>
+        </form>
+    </div>
 </body>
 <script src="js/popup.js"></script>
 </html>

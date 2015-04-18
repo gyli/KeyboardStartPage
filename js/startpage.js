@@ -3,9 +3,24 @@ chrome.tabs.getSelected(null, function(tab){
     window.MainTabId=tab.id
 });
 
-String.prototype.inList=function(list){
-    return ( list.indexOf(this.toString()) != -1)
-}
+// Set default values
+chrome.storage.sync.get('default', function(val) {
+    if (val['default'] != "passed" || typeof val['default'] === "undefined"){
+        var defaultlink = {
+            'li_c': 'http://www.crowdskout.com/',
+            'li_g': 'https://www.google.com/',
+            'li_y': 'http://youtube.com/',
+            'li_k': 'http://keep.google.com/',
+            'li_s': 'http://stackoverflow.com/',
+            'default': 'passed'
+        };
+        chrome.storage.sync.set(defaultlink, function(){});
+        // Refesh page to get new icons
+        chrome.runtime.getBackgroundPage(function (eventPage) {
+            eventPage.RefreshTab(window.mainTabId);
+        });
+    }
+});
 
 var Keys = "1234567890abcdefghijklmnopqrstuvwxyz";
 var BtnPrefix = "li_";
@@ -46,17 +61,8 @@ for(var i=0; i<Keys.length; i++) {
     var clickBtn = document.getElementById(BtnId);
     clickBtn.addEventListener('click', function () {
         var TargetBtnId = this.getAttribute('id');
-        // Add default values
-        chrome.storage.sync.get(TargetBtnId, function(val) {
-            if (typeof val[TargetBtnId] === "undefined" && TargetBtnId.inList(['li_y','li_c','li_g'])){
-                chrome.runtime.getBackgroundPage(function(eventPage) {
-                    eventPage.JumpToDefaultLink(TargetBtnId);
-                });
-            }else{
-                chrome.runtime.getBackgroundPage(function(eventPage) {
-                    eventPage.JumpToLink(TargetBtnId);
-                });
-            }
+        chrome.runtime.getBackgroundPage(function(eventPage) {
+            eventPage.JumpToLink(TargetBtnId);
         });
     });
 
@@ -79,12 +85,8 @@ for(var i=0; i<Keys.length; i++) {
                 favicon.src = 'http://www.google.com/s2/favicons?domain=' + val[BtnId];
             }
             else{
-                if (BtnId.inList(['li_y','li_c','li_g'])){
-                    favicon.src = 'http://www.google.com/s2/favicons?domain=google.com';
-                }else{
-                    favicon.src = "//:0";
-                    favicon.className += ' hide';
-                }
+                favicon.src = "//:0";
+                favicon.className += ' hide';
             }
         });
     })(BtnId);

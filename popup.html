@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Modify your link</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div id="output"></div>
-    <form>
-        <input name="myValue" id="myValue" value="http://" />
-        <input type="submit" value="submit" />
+    <form class="form-group">
+        <label for="newLink">Input the link for this key: </label>
+        <input name="newLink" id="newLink" value="http://" type="url" class="form-control" />
+        <input type="submit" value="submit" class="btn btn-success"/>
     </form>
-    <textarea id="log"></textarea>
 </body>
-<script src="popup.js"></script>
+<script src="js/popup.js"></script>
 </html>

@@ -3,8 +3,8 @@ function SettingPopup(btnName, tabid) {
     // URL is too dirty
     chrome.windows.create({url : "popup.html?btn="+btnName+'&tabid='+tabid,
         type: "popup",
-        height: 210,
-        width: 438,
+        height: 220,
+        width: 450,
         top: 300,
         left: 300
     });

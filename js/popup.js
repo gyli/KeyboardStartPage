@@ -30,6 +30,10 @@ form.addEventListener('submit', function(event) {
         // Create the link object with the same button id
         var storeLink = {};
         var storeLinkKey = window.btn;
+        // Add 'http://' if it's missing
+        if (!newLink.match(/^[a-zA-Z]+:\/\//)){
+            newLink = 'http://' + newLink;
+        }
         storeLink[storeLinkKey] = newLink;
         // Store it
         chrome.storage.sync.set(storeLink, function() {});

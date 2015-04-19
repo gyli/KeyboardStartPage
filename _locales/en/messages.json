@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "Keyboard Start Page",
+    "description": "The title of the application, displayed in the web store."
+  },
+  "appDesc": {
+    "message": "Open your favorite websites with visualized keyboard shortcuts.", 
+    "description":"The description of the application, displayed in the web store."
+  }
+}

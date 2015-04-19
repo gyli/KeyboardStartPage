@@ -64,13 +64,11 @@ body {
     color: #999;
     text-decoration: none;
     text-shadow: 0 1px 0 rgba(255,255,255,.75);
-    /*-moz-border-radius: 5px;*/
     -webkit-border-radius: 5px;
     border-radius: 5px;
     border-top: 1px solid #fff;
     border-bottom: 1px solid #eee;
     -webkit-box-shadow: inset 0 0 2em rgba(0,0,0,.05),0 3px 0 #ddd,0 3px 2px rgba(0,0,0,.5);
-    /*-moz-box-shadow: inset 0 0 2em rgba(0,0,0,.05),0 3px 0 #ddd,0 3px 2px rgba(0,0,0,.5);*/
     box-shadow: inset 0 0 2em rgba(0,0,0,.05),0 3px 0 #ddd,0 3px 2px rgba(0,0,0,.5);
     background: #fff;
     /*background: radial-gradient(center,ellipse cover,#fff 16%,#f6f6f6 75%,#ededed 100%);*/
@@ -87,9 +85,16 @@ body {
     border-top: 1px solid #eee;
     border-bottom: 1px solid #ccc;
     -webkit-box-shadow: inset 0 0 2em rgba(0,0,0,.075),0 0 2px rgba(0,0,0,.5);
-    /*-moz-box-shadow: inset 0 0 2em rgba(0,0,0,.075),0 0 2px rgba(0,0,0,.5);*/
     box-shadow: inset 0 0 2em rgba(0,0,0,.075),0 0 2px rgba(0,0,0,.5);
     -webkit-transition: all 0.1s linear;
+}
+
+#main li.active {
+    background: #ccf;
+}
+
+.visible .he-view{
+    visibility: visible;
 }
 
 /*KeyboardStartPage*/
@@ -136,12 +141,6 @@ body {
     top: 0;
 }
 
-#main li:hover .fav{
-    margin-bottom: 0; /* fav would be 'pressed down' when hover */
-    opacity: .1;
-    -webkit-transition: all 0.2s linear;
-}
-
 .fav {
     position: absolute;
     bottom: 3px;
@@ -151,6 +150,13 @@ body {
     border-radius: 5px;
     opacity: .6;
     /*box-shadow: 0 1px 2px #333 inset;*/
+}
+
+
+#main li:hover .fav{
+    margin-bottom: 0; /* fav would be 'pressed down' when hover */
+    opacity: .1;
+    -webkit-transition: all 0.2s linear;
 }
 
 .hide {

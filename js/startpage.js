@@ -1,23 +1,22 @@
 // Get the current tab id
 chrome.tabs.getSelected(null, function(tab){
-    window.MainTabId=tab.id
+    window.MainTabId = tab.id
 });
 
-// Set default values
+// Set default values if it's the first time
 chrome.storage.sync.get('default', function(val) {
     if (val['default'] != "passed" || typeof val['default'] === "undefined"){
         var defaultlink = {
-            'li_c': 'http://www.crowdskout.com/',
+            'li_t': 'https://twitter.com/',
             'li_g': 'https://www.google.com/',
             'li_y': 'http://youtube.com/',
-            'li_k': 'http://keep.google.com/',
-            'li_s': 'http://stackoverflow.com/',
+            'li_f': 'https://www.facebook.com/',
             'default': 'passed'
         };
         chrome.storage.sync.set(defaultlink, function(){});
         // Refesh page to get new icons
-        chrome.runtime.getBackgroundPage(function (eventPage) {
-            eventPage.RefreshTab(window.mainTabId);
+        chrome.runtime.getBackgroundPage(function(e){
+            e.RefreshTab(window.mainTabId);
         });
     }
 });
@@ -28,6 +27,16 @@ for(var i=0; i<Keys.length; i++) {
     var btnName = Keys.charAt(i);
     var BtnId = BtnPrefix + btnName;
 
+    // register the hover action
+    $('#li_' + btnName).hover(
+        function() {
+            $(this).addClass('visible');
+        },
+        function() {
+            $(this).removeClass('visible');
+        }
+    );
+
     // edit button
     var editBtn = document.getElementById(BtnId).getElementsByClassName("edit")[0];
     editBtn.addEventListener('click', function () {
@@ -36,8 +45,8 @@ for(var i=0; i<Keys.length; i++) {
         // when clicking small icon, don't open the link
         event.cancelBubble=true;
         // Open the setting page
-        chrome.runtime.getBackgroundPage(function(eventPage) {
-            eventPage.SettingPopup(TargetBtnId, window.MainTabId);
+        chrome.runtime.getBackgroundPage(function(e){
+            e.SettingPopup(TargetBtnId, window.MainTabId);
         });
     });
 
@@ -47,44 +56,49 @@ for(var i=0; i<Keys.length; i++) {
         var TargetBtnId = this.parentNode.parentNode.getAttribute('id');
         // when clicking small icon, don't open the link
         event.cancelBubble=true;
-        // Delete the stored link
-        chrome.storage.sync.remove(TargetBtnId);
-        // refresh the start page
-        chrome.runtime.getBackgroundPage(function(eventPage) {
-            eventPage.RefreshTab(window.MainTabId);
+        // Only delete when the value is not null
+        chrome.storage.sync.get(TargetBtnId, function(val) {
+            if (val[TargetBtnId] !== null && typeof val[TargetBtnId] !== "undefined"){
+                // Delete the stored link
+                chrome.storage.sync.remove(TargetBtnId);
+                // refresh the start page
+                chrome.runtime.getBackgroundPage(function(e){
+                    e.RefreshTab(window.MainTabId);
+                });
+            }
         });
     });
 
     // Key clicking
     var clickBtn = document.getElementById(BtnId);
-    clickBtn.addEventListener('click', function (e) {
+    clickBtn.addEventListener('click', function (event) {
         var TargetBtnId = this.getAttribute('id');
-        chrome.runtime.getBackgroundPage(function(eventPage) {
-            if (e.which == 2) {  // middle click
-                eventPage.JumpToLinkInNewTab(TargetBtnId);
+        chrome.runtime.getBackgroundPage(function(e) {
+            if (event.which == 2) {  // middle click
+                e.JumpToLinkInNewTab(TargetBtnId);
             }else{  // left click
-                eventPage.JumpToLink(TargetBtnId);
+                e.JumpToLink(TargetBtnId);
             }
         });
     });
 
-    // Single key binding
     (function(btnName) {
+        // Single key binding
         Mousetrap.bind(btnName, function () {
-            chrome.runtime.getBackgroundPage(function (eventPage) {
-                eventPage.JumpToLink(BtnPrefix + btnName);
-            });
-            // TODO: hover the div with color
+            chrome.runtime.getBackgroundPage(function(e){e.JumpToLink(BtnPrefix + btnName);});
+            $("#li_" + btnName).addClass("active");
+            setTimeout(function(){
+                $("#li_" + btnName).removeClass("active");
+            }, 200);
         });
-    })(btnName);
 
-    // Combined key binding
-    (function(btnName) {
+        // Combined key binding: open link in new tab by pressing Shift+Key
         Mousetrap.bind('shift+'+btnName, function () {
-            chrome.runtime.getBackgroundPage(function (eventPage) {
-                eventPage.JumpToLinkInNewTab(BtnPrefix + btnName);
-            });
-            // TODO: hover the div with color
+            chrome.runtime.getBackgroundPage(function (e){e.JumpToLinkInNewTab(BtnPrefix + btnName);});
+            $("#li_" + btnName).addClass("active");
+            setTimeout(function(){
+                $("#li_" + btnName).removeClass("active");
+            }, 200);
         });
     })(btnName);
 
@@ -100,7 +114,4 @@ for(var i=0; i<Keys.length; i++) {
             }
         });
     })(BtnId);
-
-
-
 }

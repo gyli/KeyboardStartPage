@@ -19,8 +19,6 @@ function JumpToLink(BtnId) {
                 var tab = tabs[0];
                 chrome.tabs.update(tab.id, {url: val[BtnId]});
             });
-        }else{
-        //TODO: blink the button with another color
         }
     });
 }
@@ -30,8 +28,6 @@ function JumpToLinkInNewTab(BtnId) {
     chrome.storage.sync.get(BtnId, function(val) {
         if (val[BtnId] !== null && typeof val[BtnId] !== "undefined"){
             window.open(val[BtnId]);
-        }else{
-            //TODO: blink the button with another color
         }
     });
 }

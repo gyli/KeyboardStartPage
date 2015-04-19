@@ -7,13 +7,13 @@ var form = document.querySelector('form');
 window.btn = getQueryVariable("btn");
 window.mainTabId = parseInt(getQueryVariable("tabid"));
 chrome.tabs.getSelected(null, function(tab){
-    window.popUpTabId=tab.id
+    window.popUpTabId = tab.id
 });
 
 function getQueryVariable(variable) {
     var query = window.location.search.substring(1);
     var vars = query.split("&");
-    for (var i=0;i<vars.length;i++) {
+    for (var i = 0; i < vars.length; i++) {
         var pair = vars[i].split("=");
         if (pair[0] == variable) {
             return pair[1];
@@ -21,8 +21,13 @@ function getQueryVariable(variable) {
     }
 }
 
+// Set up initial value of input box and put cursor at end of it
+input.addEventListener("focus", function() {
+    this.value = 'http://';
+});
+
 // Get a new link
-form.addEventListener('submit', function(event) {
+form.addEventListener('submit', function(e) {
     // Get input link
     var newLink=input.value;
     if (IsURL(newLink)){
@@ -35,25 +40,27 @@ form.addEventListener('submit', function(event) {
         }
         storeLink[storeLinkKey] = newLink;
         // Store it
-        chrome.storage.sync.set(storeLink, function() {});
+        chrome.storage.sync.set(storeLink);
         // Refesh the start page
-        chrome.runtime.getBackgroundPage(function(event){event.RefreshTab(window.mainTabId)});
+        chrome.runtime.getBackgroundPage(function(e){
+            e.RefreshTab(window.mainTabId);
+        });
         // Close the popup
-        chrome.runtime.getBackgroundPage(function(event){event.CloseTab(window.popUpTabId)});
+        chrome.runtime.getBackgroundPage(function(e){
+            e.CloseTab(window.popUpTabId);
+        });
     }else{
         warning.innerText = 'Please input a valid URL.';
     }
-    event.preventDefault();
+    e.preventDefault();
 });
 
 function valueChanged(KeyId, newValue) {
     if (newValue !== null && typeof newValue !== "undefined"){
         output.innerText = "Key '" + KeyId.substring(3, 4).toUpperCase() + "' is currently binded to " + newValue;
-        output.className = "changed";
     }else{
         output.innerText = 'This key has not been setted yet!';
     }
-    //window.setTimeout(function() {output.className="";}, 200);
 }
 
 // After the link changed
@@ -61,7 +68,9 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
     if (changes[window.btn]) {
         valueChanged(window.btn, changes[window.btn].newValue);
         // Refresh the parent page
-        chrome.runtime.getBackgroundPage(function(event){event.RefreshTab(window.mainTabId)});
+        chrome.runtime.getBackgroundPage(function(e){
+            e.RefreshTab(window.mainTabId);
+        });
     }
 });
 

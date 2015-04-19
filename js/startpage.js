@@ -9,7 +9,7 @@ chrome.storage.sync.get('default', function(val) {
         var defaultlink = {
             'li_t': 'https://twitter.com/',
             'li_g': 'https://www.google.com/',
-            'li_y': 'http://youtube.com/',
+            'li_y': 'http://www.youtube.com',
             'li_f': 'https://www.facebook.com/',
             'default': 'passed'
         };

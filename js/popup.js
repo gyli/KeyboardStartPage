@@ -22,8 +22,12 @@ function getQueryVariable(variable) {
 }
 
 // Set up initial value of input box and put cursor at end of it
+var first = true;
 input.addEventListener("focus", function() {
-    this.value = 'http://';
+    if (first == true){
+        this.value = 'http://';
+        first = false;
+    }
 });
 
 // Get a new link

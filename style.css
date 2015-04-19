@@ -108,10 +108,6 @@ body {
     visibility: hidden
 }
 
-.he-view-show {
-    visibility: visible
-}
-
 .he-view a {
     opacity: .2;
     background-size: 16px 16px;

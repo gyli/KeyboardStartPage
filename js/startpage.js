@@ -33,7 +33,6 @@ for(var i=0; i<Keys.length; i++) {
     editBtn.addEventListener('click', function () {
         // Get the button name
         var TargetBtnId = this.parentNode.parentNode.getAttribute('id');
-
         // when clicking small icon, don't open the link
         event.cancelBubble=true;
         // Open the setting page
@@ -48,21 +47,24 @@ for(var i=0; i<Keys.length; i++) {
         var TargetBtnId = this.parentNode.parentNode.getAttribute('id');
         // when clicking small icon, don't open the link
         event.cancelBubble=true;
-        chrome.runtime.getBackgroundPage(function(eventPage) {
-            eventPage.DeleteLink(TargetBtnId);
-        });
+        // Delete the stored link
+        chrome.storage.sync.remove(TargetBtnId);
+        // refresh the start page
         chrome.runtime.getBackgroundPage(function(eventPage) {
             eventPage.RefreshTab(window.MainTabId);
         });
-        // TODO: refresh the page to update the icon?
     });
 
-    // Clicking
+    // Key clicking
     var clickBtn = document.getElementById(BtnId);
-    clickBtn.addEventListener('click', function () {
+    clickBtn.addEventListener('click', function (e) {
         var TargetBtnId = this.getAttribute('id');
         chrome.runtime.getBackgroundPage(function(eventPage) {
-            eventPage.JumpToLink(TargetBtnId);
+            if (e.which == 2) {  // middle click
+                eventPage.JumpToLinkInNewTab(TargetBtnId);
+            }else{  // left click
+                eventPage.JumpToLink(TargetBtnId);
+            }
         });
     });
 
@@ -76,17 +78,25 @@ for(var i=0; i<Keys.length; i++) {
         });
     })(btnName);
 
+    // Combined key binding
+    (function(btnName) {
+        Mousetrap.bind('shift+'+btnName, function () {
+            chrome.runtime.getBackgroundPage(function (eventPage) {
+                eventPage.JumpToLinkInNewTab(BtnPrefix + btnName);
+            });
+            // TODO: hover the div with color
+        });
+    })(btnName);
+
     // Whether display favicon
     (function(BtnId) {
         var favicon = document.getElementById(BtnId).getElementsByClassName("fav")[0];
-
         chrome.storage.sync.get(BtnId, function(val) {
             if (val[BtnId] !== null && typeof val[BtnId] !== "undefined"){
                 favicon.src = 'http://www.google.com/s2/favicons?domain=' + val[BtnId];
-            }
-            else{
+            }else{
                 favicon.src = "//:0";
-                favicon.className += ' hide';
+                favicon.className = 'fav hide';
             }
         });
     })(BtnId);

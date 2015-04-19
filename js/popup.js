@@ -25,7 +25,6 @@ function getQueryVariable(variable) {
 form.addEventListener('submit', function(event) {
     // Get input link
     var newLink=input.value;
-    // TODO: link validation
     if (IsURL(newLink)){
         // Create the link object with the same button id
         var storeLink = {};
@@ -51,8 +50,7 @@ function valueChanged(KeyId, newValue) {
     if (newValue !== null && typeof newValue !== "undefined"){
         output.innerText = "Key '" + KeyId.substring(3, 4).toUpperCase() + "' is currently binded to " + newValue;
         output.className = "changed";
-    }
-    else{
+    }else{
         output.innerText = 'This key has not been setted yet!';
     }
     //window.setTimeout(function() {output.className="";}, 200);
@@ -68,7 +66,6 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 });
 
 chrome.storage.sync.get(window.btn, function(val) {valueChanged(window.btn, val[window.btn])});
-
 
 function IsURL(str_url) {
     var strRegex = "^((https|http|ftp|rtsp|mms)?://)" + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" + "(([0-9]{1,3}.){3}[0-9]{1,3}" + "|" + "([0-9a-z_!~*'()-]+.)*" + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]." + "[a-z]{2,6})" + "(:[0-9]{1,4})?" + "((/?)|" + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";

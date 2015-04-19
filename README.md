@@ -10,9 +10,10 @@ On the page there's only a virtual keyboard and you can set each key to the link
 * Open link in a new tab by pressing Shift+<Key> or middle clicking.
 
 ## Installation
+Download this extension from [Google Webstore](https://chrome.google.com/webstore/detail/keyboard-start-page/lcgabkjfibeakijbhicjjilchhmjaiid).
 
-Download this extension from [Google Webstore](/screenshot/screenshot-1.png).
-
+## Screenshots
+![Screenshot of Keyboard Start Page](https://github.com/ligyxy/KeyboardStartPage/blob/master/screenshot/screenshot-1.png?raw=true)
 
 ## Thanks
 The original idea is from [https://github.com/qex/keystart](https://github.com/qex/keystart).

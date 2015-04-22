@@ -14,12 +14,19 @@ chrome.storage.sync.get('default', function(val) {
             'default': 'passed'
         };
         chrome.storage.sync.set(defaultlink, function(){});
-        // Refesh page to get new icons
+        // Refresh page to get new icons
         chrome.runtime.getBackgroundPage(function(e){
             e.RefreshTab(window.mainTabId);
         });
     }
 });
+
+function btnHover(btn){
+    $("#li_" + btn).addClass("active");
+    setTimeout(function(){
+        $("#li_" + btn).removeClass("active");
+    }, 200);
+}
 
 var Keys = "1234567890abcdefghijklmnopqrstuvwxyz";
 var BtnPrefix = "li_";
@@ -27,7 +34,7 @@ for(var i=0; i<Keys.length; i++) {
     var btnName = Keys.charAt(i);
     var BtnId = BtnPrefix + btnName;
 
-    // register the hover action
+    // register the hover action to display edit button
     $('#li_' + btnName).hover(
         function() {
             $(this).addClass('visible');
@@ -74,10 +81,20 @@ for(var i=0; i<Keys.length; i++) {
     clickBtn.addEventListener('click', function (event) {
         var TargetBtnId = this.getAttribute('id');
         chrome.runtime.getBackgroundPage(function(e) {
-            if (event.which == 2) {  // middle click
-                e.JumpToLinkInNewTab(TargetBtnId);
+            if (event.which == 2) {
+                // middle click
+                e.JumpToLink(TargetBtnId, 'inactive');
+            }else if (event.metaKey && event.shiftKey){
+                // Command + Shift + click or Ctrl + Shift + click
+                e.JumpToLink(TargetBtnId, 'active');
+            }else if (event.metaKey || event.ctrlKey){
+                //Ctrl + click or Command + click
+                e.JumpToLink(TargetBtnId, 'inactive');
+            }else if (event.shiftKey){
+                // Shift + click
+                e.JumpToLink(TargetBtnId, 'window');
             }else{  // left click
-                e.JumpToLink(TargetBtnId);
+                e.JumpToLink(TargetBtnId, 'same');
             }
         });
     });
@@ -85,32 +102,37 @@ for(var i=0; i<Keys.length; i++) {
     (function(btnName) {
         // Single key binding
         Mousetrap.bind(btnName, function () {
-            chrome.runtime.getBackgroundPage(function(e){e.JumpToLink(BtnPrefix + btnName);});
-            $("#li_" + btnName).addClass("active");
-            setTimeout(function(){
-                $("#li_" + btnName).removeClass("active");
-            }, 200);
+            chrome.runtime.getBackgroundPage(function(e){e.JumpToLink(BtnPrefix + btnName, 'same');});
+            btnHover(btnName);
+        });
+
+        // Combined key binding: open link in new tab by pressing Alt+Key
+        // TODO: test alt+F in Windows
+        Mousetrap.bind('alt+'+btnName, function () {
+            chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, 'inactive');});
+            btnHover(btnName);
         });
 
         // Combined key binding: open link in new tab by pressing Shift+Key
         Mousetrap.bind('shift+'+btnName, function () {
-            chrome.runtime.getBackgroundPage(function (e){e.JumpToLinkInNewTab(BtnPrefix + btnName);});
-            $("#li_" + btnName).addClass("active");
-            setTimeout(function(){
-                $("#li_" + btnName).removeClass("active");
-            }, 200);
+            chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, 'window');});
+            btnHover(btnName);
+        });
+
+        // Combined key binding: open link in new tab by pressing Shift+Key
+        Mousetrap.bind('shift+alt+'+btnName, function () {
+            chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, 'active');});
+            btnHover(btnName);
         });
     })(btnName);
 
     // Whether display favicon
     (function(BtnId) {
-        var favicon = document.getElementById(BtnId).getElementsByClassName("fav")[0];
         chrome.storage.sync.get(BtnId, function(val) {
+            var favicon = $("#" + BtnId + " img");
             if (val[BtnId] !== null && typeof val[BtnId] !== "undefined"){
-                favicon.src = 'http://www.google.com/s2/favicons?domain=' + val[BtnId];
-            }else{
-                favicon.src = "//:0";
-                favicon.className = 'fav hide';
+                favicon.attr("src", "http://www.google.com/s2/favicons?domain=" + val[BtnId]);
+                favicon.css("visibility", "visible");
             }
         });
     })(BtnId);

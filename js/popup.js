@@ -21,6 +21,12 @@ function getQueryVariable(variable) {
     }
 }
 
+function IsURL(str_url) {
+    var strRegex = "^((https|http|ftp|rtsp|mms)?://)" + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" + "(([0-9]{1,3}.){3}[0-9]{1,3}" + "|" + "([0-9a-z_!~*'()-]+.)*" + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]." + "[a-z]{2,6})" + "(:[0-9]{1,4})?" + "((/?)|" + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+    var re = new RegExp(strRegex);
+    return !!re.test(str_url);
+}
+
 // Set up initial value of input box and put cursor at end of it
 var first = true;
 input.addEventListener("focus", function() {
@@ -61,9 +67,9 @@ form.addEventListener('submit', function(e) {
 
 function valueChanged(KeyId, newValue) {
     if (newValue !== null && typeof newValue !== "undefined"){
-        output.innerText = "Key '" + KeyId.substring(3, 4).toUpperCase() + "' is currently binded to " + newValue;
+        output.innerText = "Key '" + KeyId.substring(3, 4).toUpperCase() + "' is currently bound to " + newValue;
     }else{
-        output.innerText = 'This key has not been setted yet!';
+        output.innerText = 'This key has not been bound.';
     }
 }
 
@@ -79,9 +85,3 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 });
 
 chrome.storage.sync.get(window.btn, function(val) {valueChanged(window.btn, val[window.btn])});
-
-function IsURL(str_url) {
-    var strRegex = "^((https|http|ftp|rtsp|mms)?://)" + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" + "(([0-9]{1,3}.){3}[0-9]{1,3}" + "|" + "([0-9a-z_!~*'()-]+.)*" + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]." + "[a-z]{2,6})" + "(:[0-9]{1,4})?" + "((/?)|" + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
-    var re = new RegExp(strRegex);
-    return !!re.test(str_url);
-}

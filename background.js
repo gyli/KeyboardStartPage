@@ -10,29 +10,29 @@ function SettingPopup(btnName, tabid) {
     });
 }
 
-// Open link in the same tab
-function JumpToLink(BtnId) {
-    // parm BtnId: example li_1
+function JumpToLink(BtnId, type) {
+    // BtnId: example li_1
     chrome.storage.sync.get(BtnId, function(val) {
         if (val[BtnId] !== null && typeof val[BtnId] !== "undefined"){
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                var tab = tabs[0];
-                chrome.tabs.update(tab.id, {url: val[BtnId]});
-            });
+            if (type == 'same') {  // Open link in the same tab
+                chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+                    var tab = tabs[0];
+                    chrome.tabs.update(tab.id, {url: val[BtnId]});
+                });
+            }else if (type == 'active'){  // Open link in a new tab
+                window.open(val[BtnId]);
+            }else if (type == 'inactive'){  // Open link in a new tab but inactive
+                chrome.tabs.create({url : val[BtnId], active:false});
+            }else if(type == 'window'){  // Open link in a new window
+                chrome.windows.create({url : val[BtnId]});
+            }else{
+                console.log('Invalid tab parameter.');
+            }
         }
     });
 }
 
-// Open link in a new tab
-function JumpToLinkInNewTab(BtnId) {
-    chrome.storage.sync.get(BtnId, function(val) {
-        if (val[BtnId] !== null && typeof val[BtnId] !== "undefined"){
-            window.open(val[BtnId]);
-        }
-    });
-}
-
-// Refesh tab
+// Refresh tab
 function RefreshTab(tabid) {
     chrome.tabs.reload(tabid);
 }

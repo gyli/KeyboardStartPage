@@ -81,19 +81,23 @@ for(var i=0; i<Keys.length; i++) {
     clickBtn.addEventListener('click', function (event) {
         var TargetBtnId = this.getAttribute('id');
         chrome.runtime.getBackgroundPage(function(e) {
-            if (event.which == 2) {
-                // middle click
-                e.JumpToLink(TargetBtnId, 'inactive');
+            if (event.which == 2 && event.shiftKey) {
+                // Shift + middle click
+                e.JumpToLink(TargetBtnId, 'active');
             }else if (event.metaKey && event.shiftKey){
                 // Command + Shift + click or Ctrl + Shift + click
                 e.JumpToLink(TargetBtnId, 'active');
             }else if (event.metaKey || event.ctrlKey){
                 //Ctrl + click or Command + click
                 e.JumpToLink(TargetBtnId, 'inactive');
+            }else if (event.which == 2){
+                // middle click
+                e.JumpToLink(TargetBtnId, 'inactive');
             }else if (event.shiftKey){
                 // Shift + click
                 e.JumpToLink(TargetBtnId, 'window');
-            }else{  // left click
+            }else{
+                // left click
                 e.JumpToLink(TargetBtnId, 'same');
             }
         });

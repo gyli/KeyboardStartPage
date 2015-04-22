@@ -10,16 +10,14 @@ Download this extension from [Chrome Web Store](https://chrome.google.com/websto
 ![Screenshot of Keyboard Start Page](https://github.com/ligyxy/KeyboardStartPage/blob/master/screenshot/screenshot-1.png?raw=true)
 
 ## Shortcut Table
-|Shortcuts|Actions|
-|---|---|
-|Mouse left click|Open link in the same tab|
-|Ctrl + click|Open link in an inactive new tab|
-|Ctrl + Shift + click|Open link in an active new tab|
-|Shift + click|Open link in a new window|
-|\<Key\>|Open link in the same tab|
-|Alt + \<Key\>|Open link in an inactive new tab|
-|Shift + Alt + \<Key\>|Open link in an active new tab|
-|Shift + \<Key\>|Open link in a new window|
+All the shortcuts with clicking follow the [native shortcuts in Chrome](https://support.google.com/chrome/answer/157179), while for pure keyboard shortcuts, **Ctrl** is replaced by **Alt** and **⌘** is replaced by **⌥** to avoid conflict.
+
+|Windows/Linux|Mac|Default Actions|
+|---|---|---|
+|**\<Key\>** or left click a key|**\<Key\>** or left click a key|Opens the link in the same tab.|
+|**Alt + \<Key\>**, or **Ctrl + click**, or middle click|**⌥ + \<Key\>**, or **⌘ + click**, or middle click|Opens the link in a new tab in the background.|
+|**Alt + Shift + \<Key\>** or **Ctrl + Shift + click**, or **Shift + middle click**|**⌥ + ⇧ + \<Key\>** or **⌘ + ⇧ + click**, or **Shift + middle click**|Open the link in a new tab and switches to the newly opened tab.|
+|**Shift + \<Key\>**, or **Shift + click**|**⇧ + \<Key\>**, or **⇧ + click**|Opens the link in a new window.|
 
 ## Tips
 * The cursor always starts from URL bar for every new tab due to the limit of browser. Press \<Tab\> or click the page to focus on the page if you want to use the shortcuts after opening a new tab.

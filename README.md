@@ -14,7 +14,7 @@ Download this extension from [Chrome Web Store](https://chrome.google.com/websto
 * The cursor always starts from URL bar for every new tab due to the limit of browser. Press \<Tab\> or click the page to focus on the page if you want to use the shortcuts after opening a new tab.
 
 ## Thanks
-The original idea is from [/t/32295](https://www.v2ex.com/t/32295).
+The original idea comes from [/t/32295](https://www.v2ex.com/t/32295).
 
 Some code is from the website version [https://github.com/qex/keystart](https://github.com/qex/keystart).
 

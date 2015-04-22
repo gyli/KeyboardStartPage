@@ -1,0 +1,8 @@
+# Change Log
+
+## [0.2.5] - 04/22/2015
+### Added
+- Add more shortcuts including Shift+click, Ctrl+click, Ctrl+Shift+click, Alt+\<Key\> and Shift+Alt+\<Key\>.
+
+### Fixed
+- Update css files.

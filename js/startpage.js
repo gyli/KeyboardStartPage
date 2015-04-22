@@ -3,22 +3,35 @@ chrome.tabs.getSelected(null, function(tab){
     window.MainTabId = tab.id
 });
 
-// Set default values if it's the first time
-chrome.storage.sync.get('default', function(val) {
-    if (val['default'] != "passed" || typeof val['default'] === "undefined"){
-        var defaultlink = {
-            'li_t': 'https://twitter.com/',
-            'li_g': 'https://www.google.com/',
-            'li_y': 'http://www.youtube.com',
-            'li_f': 'https://www.facebook.com/',
-            'default': 'passed'
-        };
-        chrome.storage.sync.set(defaultlink, function(){});
-        // Refresh page to get new icons
-        chrome.runtime.getBackgroundPage(function(e){
-            e.RefreshTab(window.mainTabId);
-        });
-    }
+// Set default links if it's the first time
+chrome.storage.sync.get(null, function(val) {
+    chrome.runtime.getBackgroundPage(function (bg) {
+        if (val['default'] != "passed" || typeof val['default'] === "undefined"){
+            var defaultValue = bg.DefaultLink;
+            chrome.storage.sync.set(defaultValue);
+            // Refresh page to get new icons
+            bg.RefreshTab(window.mainTabId);
+        }
+        // If option is empty, passing default value
+        var Actions = bg.DefaultActions;
+        for(var action in Actions) {
+            if (Actions.hasOwnProperty(action)) {
+                if (typeof val[action] === "undefined"){
+                    chrome.storage.sync.set({action: Actions[action]});
+                }
+            }
+        }
+    });
+});
+
+// Set default settings if it's the first time
+chrome.storage.sync.get('defaultActions', function(val) {
+    chrome.runtime.getBackgroundPage(function (bg) {
+        if (val['defaultActions'] != "passed" || typeof val['defaultActions'] === "undefined"){
+            var defaultValue = bg.DefaultActions;
+            chrome.storage.sync.set(defaultValue);
+        }
+    });
 });
 
 function btnHover(btn){
@@ -104,33 +117,33 @@ for(var i=0; i<Keys.length; i++) {
     });
 
     (function(btnName) {
-        // Single key binding
+        // <Key>
         Mousetrap.bind(btnName, function () {
             chrome.runtime.getBackgroundPage(function(e){e.JumpToLink(BtnPrefix + btnName, 'same');});
             btnHover(btnName);
         });
 
-        // Combined key binding: open link in new tab by pressing Alt+Key
+        // Alt+Key+<Key>
         // TODO: test alt+F in Windows
         Mousetrap.bind('alt+'+btnName, function () {
             chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, 'inactive');});
             btnHover(btnName);
         });
 
-        // Combined key binding: open link in new tab by pressing Shift+Key
+        // Shift+<Key>
         Mousetrap.bind('shift+'+btnName, function () {
             chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, 'window');});
             btnHover(btnName);
         });
 
-        // Combined key binding: open link in new tab by pressing Shift+Key
+        // Shift+Alt+<Key>
         Mousetrap.bind('shift+alt+'+btnName, function () {
             chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, 'active');});
             btnHover(btnName);
         });
     })(btnName);
 
-    // Whether display favicon
+    // Whether displaying favicon
     (function(BtnId) {
         chrome.storage.sync.get(BtnId, function(val) {
             var favicon = $("#" + BtnId + " img");

@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.2.6] - 04/23/2015
+### Added
+- Add Shift+middle click shortcut.
+
 ## [0.2.5] - 04/22/2015
 ### Added
 - Add more shortcuts including Shift+click, Ctrl+click, Ctrl+Shift+click, Alt+\<Key\> and Shift+Alt+\<Key\>.

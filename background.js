@@ -41,3 +41,32 @@ function RefreshTab(tabid) {
 function CloseTab(tabid) {
     chrome.tabs.remove(tabid);
 }
+
+var DefaultLink = {
+    'default': 'passed',
+    'li_t': 'https://twitter.com/',
+    'li_g': 'https://www.google.com/',
+    'li_y': 'http://www.youtube.com',
+    'li_f': 'https://www.facebook.com/'};
+
+var DefaultActions = {
+    'defaultActions': 'passed',
+    'ShiftMiddleClick': 'active',
+    'CtrlShiftClick': 'active',
+    'CtrlClick': 'inactive',
+    'MiddleClick': 'inactive',
+    'ShiftClick': 'window',
+    'Click': 'same',
+    'Key': 'same',
+    'AltKey': 'inactive',
+    'ShiftKey': 'window',
+    'ShiftAltKey': 'active'
+};
+
+var ShortcutOptions = {
+    'active': 'Active',
+    'inactive': 'Inactive',
+    'same': 'Same tab',
+    'window': 'New window',
+    'none': 'None'
+};

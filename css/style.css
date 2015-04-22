@@ -30,7 +30,7 @@ a {
 }
 
 html {
-    background: url('img/bg.gif')
+    background: url('../img/bg.gif')
 }
 
 body {
@@ -125,12 +125,12 @@ body {
 
 .he-view .edit
 {
-    background-image:url('img/add.png');
+    background-image:url('../img/add.png');
     left: 8px;
 }
 .he-view .delete
 {
-    background-image:url('img/delete.png');
+    background-image:url('../img/delete.png');
     right: 8px;
 }
 

@@ -9,8 +9,19 @@ Download this extension from [Chrome Web Store](https://chrome.google.com/websto
 ## Screenshots
 ![Screenshot of Keyboard Start Page](https://github.com/ligyxy/KeyboardStartPage/blob/master/screenshot/screenshot-1.png?raw=true)
 
+## Shortcut Table
+|Shortcuts|Actions|
+|---|---|
+|Mouse left click|Open link in the same tab|
+|Ctrl + click|Open link in an inactive new tab|
+|Ctrl + Shift + click|Open link in an active new tab|
+|Shift + click|Open link in a new window|
+|\<Key\>|Open link in the same tab|
+|Alt + \<Key\>|Open link in an inactive new tab|
+|Shift + Alt + \<Key\>|Open link in an active new tab|
+|Shift + \<Key\>|Open link in a new window|
+
 ## Tips
-* Open link in a new tab by pressing Shift+\<Key\> or middle clicking.
 * The cursor always starts from URL bar for every new tab due to the limit of browser. Press \<Tab\> or click the page to focus on the page if you want to use the shortcuts after opening a new tab.
 
 ## Thanks
@@ -19,4 +30,4 @@ The original idea comes from [/t/32295](https://www.v2ex.com/t/32295).
 Some code is from the website version [https://github.com/qex/keystart](https://github.com/qex/keystart).
 
 ## License
-This extension uses the MIT license.
+Copyright (c) Guangyang Li. See LICENSE for details.

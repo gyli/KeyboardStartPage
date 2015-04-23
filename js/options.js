@@ -46,9 +46,9 @@ chrome.runtime.getBackgroundPage(function (bg) {
     }
 
     // Background color
-    var defaultcolor = bg.DefaultBGColor;
+    var defaultColor = bg.DefaultBGColor;
     chrome.storage.sync.get('bgColor', function(val){
-        var initialColor = defaultcolor;
+        var initialColor = defaultColor;
         if (val['bgColor'] !== null && typeof val['bgColor'] !== "undefined"){
             initialColor = val['bgColor']
         }
@@ -61,7 +61,7 @@ chrome.runtime.getBackgroundPage(function (bg) {
     });
     // Set to default color
     $("#bgcolor-default").click(function () {
-        $('#colorpicker').val(defaultcolor);
-        chrome.storage.sync.set({bgColor: defaultcolor});
+        $('#colorpicker').val(defaultColor);
+        chrome.storage.sync.set({bgColor: defaultColor});
     });
 });

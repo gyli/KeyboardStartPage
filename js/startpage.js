@@ -10,24 +10,38 @@ function btnHover(btn){
     }, 200);
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    chrome.runtime.getBackgroundPage(function (bg) {
+        chrome.storage.sync.get(null, function(val){
+            // Update background color
+            var defaultColor = bg.DefaultBGColor;
+            var initialColor = defaultColor;
+            if (val['bgColor'] !== null && typeof val['bgColor'] !== "undefined") {
+                initialColor = val['bgColor']
+            }else{
+                chrome.storage.sync.set({bgColor: defaultColor});
+            }
+            $('html').css('background', initialColor);
+
+            // Set default links and settings if it's the first time
+            if (val['default'] != "passed" || typeof val['default'] === "undefined"){
+                var defaultValue = bg.DefaultLink;
+                chrome.storage.sync.set(defaultValue);
+                // Refresh page to get new icons
+                bg.RefreshTab(window.mainTabId);
+            }
+            // If option is empty, passing default value
+            if (val['defaultActions'] != "passed" || typeof val['defaultActions'] === "undefined"){
+                chrome.storage.sync.set(bg.DefaultActions);
+            }
+        });
+    });
+});
+
 var Keys = "1234567890abcdefghijklmnopqrstuvwxyz";
 var BtnPrefix = "li_";
 
 chrome.storage.sync.get(null, function (val) {
-    // Set default links and settings if it's the first time
-    chrome.runtime.getBackgroundPage(function (bg) {
-        if (val['default'] != "passed" || typeof val['default'] === "undefined"){
-            var defaultValue = bg.DefaultLink;
-            chrome.storage.sync.set(defaultValue);
-            // Refresh page to get new icons
-            bg.RefreshTab(window.mainTabId);
-        }
-        // If option is empty, passing default value
-        if (val['defaultActions'] != "passed" || typeof val['defaultActions'] === "undefined"){
-            chrome.storage.sync.set(bg.DefaultActions);
-        }
-    });
-
     for(var i=0; i<Keys.length; i++) {
         var btnName = Keys.charAt(i);
         var BtnId = BtnPrefix + btnName;
@@ -65,10 +79,10 @@ chrome.storage.sync.get(null, function (val) {
             if (val[TargetBtnId] !== null && typeof val[TargetBtnId] !== "undefined"){
                 // Delete the stored link
                 chrome.storage.sync.remove(TargetBtnId);
-                // refresh the start page
-                chrome.runtime.getBackgroundPage(function(e){
-                    e.RefreshTab(window.MainTabId);
-                });
+                // delete the icon
+                var favicon = $("#" + TargetBtnId + " img");
+                favicon.attr("src", "#");
+                favicon.css("visibility", "hidden");
             }
         });
 
@@ -122,17 +136,4 @@ chrome.storage.sync.get(null, function (val) {
             }
         })(BtnId);
     }
-});
-
-// Update background color
-document.addEventListener('DOMContentLoaded', function () {
-    chrome.storage.sync.get('bgColor', function(val){
-        chrome.runtime.getBackgroundPage(function (bg) {
-            var initialColor = bg.DefaultBGColor;
-            if (val['bgColor'] !== null && typeof val['bgColor'] !== "undefined") {
-                initialColor = val['bgColor']
-            }
-            $('html').css('background', initialColor);
-        });
-    });
 });

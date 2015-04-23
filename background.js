@@ -58,9 +58,7 @@ var DefaultActions = {
     'ShiftClick': 'window',
     'Click': 'same',
     'Key': 'same',
-    'AltKey': 'inactive',
-    'ShiftKey': 'window',
-    'ShiftAltKey': 'active'
+    'ShiftKey': 'inactive'
 };
 
 var ShortcutOptions = {

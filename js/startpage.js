@@ -106,22 +106,9 @@ chrome.storage.sync.get(null, function (val) {
                 btnHover(btnName);
             });
 
-            // Alt+Key+<Key>
-            // TODO: test alt+F in Windows
-            Mousetrap.bind('alt+'+btnName, function () {
-                chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, val['AltKey']);});
-                btnHover(btnName);
-            });
-
-            // Shift+<Key>
+            // Shift + <Key>
             Mousetrap.bind('shift+'+btnName, function () {
                 chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, val['ShiftKey']);});
-                btnHover(btnName);
-            });
-
-            // Shift+Alt+<Key>
-            Mousetrap.bind('shift+alt+'+btnName, function () {
-                chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, val['ShiftAltKey']);});
                 btnHover(btnName);
             });
         })(btnName);

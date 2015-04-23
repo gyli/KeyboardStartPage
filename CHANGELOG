@@ -5,6 +5,10 @@
 - Add Shift+middle click shortcut.
 - Add an option page for shortcuts setting.
 
+### Updated
+- Remove Alt+\<Key\> and Shift+Alt+\<Key\> due to shortcut conflict.
+- Update the default action of Shift+\<Key\> from opening link in new window to new inactive tab.
+
 ## [0.2.5] - 04/22/2015
 ### Added
 - Add more shortcuts including Shift+click, Ctrl+click, Ctrl+Shift+click, Alt+\<Key\> and Shift+Alt+\<Key\>.

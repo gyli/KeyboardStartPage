@@ -3,39 +3,8 @@ blockquote,body,button,code,dd,div,dl,dt,fieldset,form,h1,h2,h3,h4,h5,h6,input,l
     padding: 0
 }
 
-img {
-    border: 0;
-    display: block
-}
-
 ul {
     list-style: none
-}
-
-h1,h2,h3,h4,h5,h6 {
-    font-size: 100%;
-    font-weight: 400
-}
-
-button,input {
-      font-family: inherit;
-      font-size: inherit;
-      font-style: inherit;
-      font-weight: inherit
-  }
-
-a {
-    color: #666;
-    text-decoration: none
-}
-
-html {
-    background: url('../img/bg.gif')
-}
-
-body {
-    font: 12px "Courier New", Courier, monospace!important;
-    color: #666
 }
 
 #main {
@@ -142,7 +111,9 @@ body {
     height: 16px;
     border-radius: 5px;
     opacity: .6;
-    visibility: hidden
+    visibility: hidden;
+    border: 0;
+    display: block
 }
 
 #main li:hover img{

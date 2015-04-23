@@ -68,3 +68,5 @@ var ShortcutOptions = {
     'window': 'In a new window',
     'none': 'None'
 };
+
+var DefaultBGColor = '#EEEEEE';

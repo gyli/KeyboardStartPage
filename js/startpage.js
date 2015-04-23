@@ -123,3 +123,16 @@ chrome.storage.sync.get(null, function (val) {
         })(BtnId);
     }
 });
+
+// Update background color
+document.addEventListener('DOMContentLoaded', function () {
+    chrome.storage.sync.get('bgColor', function(val){
+        chrome.runtime.getBackgroundPage(function (bg) {
+            var initialColor = bg.DefaultBGColor;
+            if (val['bgColor'] !== null && typeof val['bgColor'] !== "undefined") {
+                initialColor = val['bgColor']
+            }
+            $('html').css('background', initialColor);
+        });
+    });
+});

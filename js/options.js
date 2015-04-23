@@ -3,10 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
         chrome.storage.sync.get(null, function (val) {
             var Actions = bg.DefaultActions;
             var ShortcutOption = bg.ShortcutOptions;
-            for(var shortcutId in Actions) {
+            for (var shortcutId in Actions) {
                 if (Actions.hasOwnProperty(shortcutId) && shortcutId != 'defaultActions') {
-                    $.each(ShortcutOption, function(key, value) {
-                        $("#" + shortcutId).append($("<option></option>").attr("value",key).text(ShortcutOption[key]));
+                    $.each(ShortcutOption, function (key, value) {
+                        $("#" + shortcutId).append($("<option></option>").attr("value", key).text(ShortcutOption[key]));
                     });
                     $("#" + shortcutId + " option[value=" + val[shortcutId] + "]").prop("selected", "selected");
                 }
@@ -15,9 +15,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Set to default
-$("#shortcut-default").click(function () {
-    chrome.runtime.getBackgroundPage(function (bg) {
+chrome.runtime.getBackgroundPage(function (bg) {
+    // Set to default actions
+    $("#shortcut-default").click(function () {
         var Actions = bg.DefaultActions;
         for(var shortcutId in Actions) {
             if (Actions.hasOwnProperty(shortcutId) && shortcutId != 'defaultActions') {
@@ -26,10 +26,8 @@ $("#shortcut-default").click(function () {
         }
         chrome.storage.sync.set(Actions);
     });
-});
 
-// Update settings
-chrome.runtime.getBackgroundPage(function (bg) {
+    // Update settings
     var Actions = bg.DefaultActions;
     for(var shortcutId in Actions) {
         if (Actions.hasOwnProperty(shortcutId) && shortcutId != 'defaultActions') {
@@ -46,4 +44,24 @@ chrome.runtime.getBackgroundPage(function (bg) {
             })(shortcutId);
         }
     }
+
+    // Background color
+    var defaultcolor = bg.DefaultBGColor;
+    chrome.storage.sync.get('bgColor', function(val){
+        var initialColor = defaultcolor;
+        if (val['bgColor'] !== null && typeof val['bgColor'] !== "undefined"){
+            initialColor = val['bgColor']
+        }
+        // Display current setting
+        document.querySelector('input[type="color"]').value = initialColor;
+    });
+    // Update setting when changing
+    $('#colorpicker').on("change",function(){
+        chrome.storage.sync.set({bgColor: $("#colorpicker").val()});
+    });
+    // Set to default color
+    $("#bgcolor-default").click(function () {
+        $('#colorpicker').val(defaultcolor);
+        chrome.storage.sync.set({bgColor: defaultcolor});
+    });
 });

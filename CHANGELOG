@@ -4,7 +4,7 @@
 ### Added
 - Add Shift+middle click shortcut.
 - Add an option page for shortcuts setting.
-- Add background color customerization.
+- Add background color customization.
 
 ### Updated
 - Remove Alt+\<Key\> and Shift+Alt+\<Key\> due to shortcut conflict.

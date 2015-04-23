@@ -64,9 +64,9 @@ var DefaultActions = {
 };
 
 var ShortcutOptions = {
-    'active': 'Active',
-    'inactive': 'Inactive',
-    'same': 'Same tab',
-    'window': 'New window',
+    'active': 'In a new tab and switch to it',
+    'inactive': 'In a new tab but in the background',
+    'same': 'In the same tab',
+    'window': 'In a new window',
     'none': 'None'
 };

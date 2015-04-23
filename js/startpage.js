@@ -12,7 +12,7 @@ function btnHover(btn){
 
 document.addEventListener('DOMContentLoaded', function () {
     chrome.runtime.getBackgroundPage(function (bg) {
-        chrome.storage.sync.get(null, function(val){
+        chrome.storage.sync.get(['bgColor', 'default', 'defaultActions'], function(val){
             // Update background color
             var defaultColor = bg.DefaultBGColor;
             var initialColor = defaultColor;

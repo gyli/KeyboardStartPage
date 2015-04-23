@@ -31,7 +31,7 @@ section {
     margin-left: 18px;
 }
 
-label {
-    display: block;
+label, a {
+    display:inline-block;
     margin: 6px 0;
 }

@@ -28,4 +28,4 @@ The original idea comes from [/t/32295](https://www.v2ex.com/t/32295).
 Some code is from the website version [https://github.com/qex/keystart](https://github.com/qex/keystart).
 
 ## License
-Copyright (c) Guangyang Li. See LICENSE for details.
+See LICENSE for details.

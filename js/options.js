@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     $.each(ShortcutOption, function (key, value) {
                         $("#" + shortcutId).append($("<option></option>").attr("value", key).text(ShortcutOption[key]));
                     });
-                    $("#" + shortcutId + " option[value=" + val[shortcutId] + "]").prop("selected", "selected");
+                    $("#" + shortcutId + " option[value=" + Actions[shortcutId] + "]").prop("selected", "selected");
                 }
             }
         });

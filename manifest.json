@@ -3,7 +3,7 @@
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "minimum_chrome_version": "33",
   "permissions": [ "tabs", "storage", "background" ],
   "background": {
@@ -14,6 +14,6 @@
   },
   "options_page": "options.html",
   "icons": {
-    "16": "img/icon.png"
+    "32": "img/icon.ico"
   }
 }

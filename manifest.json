@@ -3,9 +3,9 @@
   "name": "__MSG_appName__",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "minimum_chrome_version": "88",
-  "permissions": [ "storage", "background" ],
+  "permissions": [ "storage", "background", "windows", "tabs" ],
   "background": {
     "service_worker": "service_worker.js",
     "type": "module"

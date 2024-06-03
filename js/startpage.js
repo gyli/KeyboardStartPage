@@ -1,7 +1,24 @@
-// Get the current tab id
-chrome.tabs.getSelected(null, function(tab){
-    window.MainTabId = tab.id
-});
+const DefaultActions = {
+    'defaultActions': 'passed',
+    'ShiftMiddleClick': 'active',
+    'CtrlShiftClick': 'active',
+    'CtrlClick': 'inactive',
+    'MiddleClick': 'inactive',
+    'ShiftClick': 'window',
+    'Click': 'same',
+    'Key': 'same',
+    'ShiftKey': 'inactive'
+};
+
+const DefaultBGColor = '#EEEEEE';
+
+var DefaultLink = {
+    'default': 'passed',
+    'li_t': 'https://twitter.com/',
+    'li_g': 'https://www.google.com/',
+    'li_y': 'http://www.youtube.com',
+    'li_f': 'https://www.facebook.com/'};
+
 
 function btnHover(btn){
     $("#li_" + btn).addClass("active");
@@ -10,127 +27,155 @@ function btnHover(btn){
     }, 200);
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    chrome.runtime.getBackgroundPage(function (bg) {
-        chrome.storage.sync.get(['bgColor', 'default', 'defaultActions'], function(val){
-            // Update background color
-            var defaultColor = bg.DefaultBGColor;
-            var initialColor = defaultColor;
-            if (val['bgColor'] !== null && typeof val['bgColor'] !== "undefined") {
-                initialColor = val['bgColor']
-            }else{
-                chrome.storage.sync.set({bgColor: defaultColor});
-            }
-            $('html').css('background', initialColor);
+// Get the current tab id
+chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    if (tabs.length > 0) {
+        window.MainTabId = tabs[0].id;
+    }
+});
 
-            // Set default links and settings if it's the first time
-            if (val['default'] != "passed" || typeof val['default'] === "undefined"){
-                var defaultValue = bg.DefaultLink;
-                chrome.storage.sync.set(defaultValue);
-                // Refresh page to get new icons
-                bg.RefreshTab(window.mainTabId);
-            }
-            // If option is empty, passing default value
-            if (val['defaultActions'] != "passed" || typeof val['defaultActions'] === "undefined"){
-                chrome.storage.sync.set(bg.DefaultActions);
-            }
-        });
+document.addEventListener('DOMContentLoaded', function () {
+    chrome.storage.sync.get(['bgColor', 'default', 'defaultActions'], function (val) {
+        // Update background color
+        const defaultColor = DefaultBGColor;
+        let initialColor = defaultColor;
+        if (val['bgColor'] !== null && typeof val['bgColor'] !== "undefined") {
+            initialColor = val['bgColor'];
+        } else {
+            chrome.storage.sync.set({bgColor: defaultColor});
+        }
+        $('html').css('background', initialColor);
+
+        // Set default links and settings if it's the first time
+        if (val['default'] !== "passed" || typeof val['default'] === "undefined") {
+            const defaultValue = DefaultLink;
+            chrome.storage.sync.set(defaultValue);
+            // Refresh page to get new icons
+            RefreshTab(window.mainTabId);
+        }
+        // If option is empty, passing default value
+        if (val['defaultActions'] !== "passed" || typeof val['defaultActions'] === "undefined") {
+            chrome.storage.sync.set(DefaultActions);
+        }
     });
 });
 
-var Keys = "1234567890abcdefghijklmnopqrstuvwxyz";
-var BtnPrefix = "li_";
+const Keys = "1234567890abcdefghijklmnopqrstuvwxyz";
+const BtnPrefix = "li_";
+
+function SettingPopup(btnName, tabid) {
+    // URL is too dirty
+    chrome.windows.create({
+        url: "popup.html?btn=" + btnName + '&tabid=' + tabid,
+        type: "popup",
+        height: 230,
+        width: 640,
+        top: 200,
+        left: 200
+    });
+}
+
+// Jump to link
+function JumpToLink(BtnId, type) {
+    chrome.storage.sync.get(BtnId, function(val) {
+        if (val[BtnId] !== null && typeof val[BtnId] !== "undefined") {
+            if (type == 'same') {  // Open link in the same tab
+                chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                    var tab = tabs[0];
+                    chrome.tabs.update(tab.id, {url: val[BtnId]});
+                });
+            } else if (type == 'active') {  // Open link in a new tab
+                window.open(val[BtnId]);
+            } else if (type == 'inactive') {  // Open link in a new tab but inactive
+                chrome.tabs.create({url: val[BtnId], active: false});
+            } else if (type == 'window') {  // Open link in a new window
+                chrome.windows.create({url: val[BtnId]});
+            } else {
+                console.log('Invalid tab parameter.');
+            }
+        }
+    });
+}
+
+// Refresh tab
+function RefreshTab(tabid) {
+    chrome.tabs.reload(tabid);
+}
 
 chrome.storage.sync.get(null, function (val) {
-    for(var i=0; i<Keys.length; i++) {
-        var btnName = Keys.charAt(i);
-        var BtnId = BtnPrefix + btnName;
+    for (let i = 0; i < Keys.length; i++) {
+        const btnName = Keys.charAt(i);
+        const BtnId = BtnPrefix + btnName;
 
         // register the hover action to display edit button
         $('#li_' + btnName).hover(
-            function() {
+            function () {
                 $(this).addClass('visible');
             },
-            function() {
+            function () {
                 $(this).removeClass('visible');
             }
         );
 
         // edit button
-        var editBtn = document.getElementById(BtnId).getElementsByClassName("edit")[0];
-        editBtn.addEventListener('click', function () {
+        const editBtn = document.getElementById(BtnId).getElementsByClassName("edit")[0];
+        editBtn.addEventListener('click', function (event) {
             // Get the button name
-            var TargetBtnId = this.parentNode.parentNode.getAttribute('id');
+            const TargetBtnId = this.parentNode.parentNode.getAttribute('id');
             // when clicking small icon, don't open the link
-            event.cancelBubble=true;
+            event.cancelBubble = true;
             // Open the setting page
-            chrome.runtime.getBackgroundPage(function(e){
-                e.SettingPopup(TargetBtnId, window.MainTabId);
-            });
+            SettingPopup(TargetBtnId, window.MainTabId);
         });
 
         // delete button
-        var deleteBtn = document.getElementById(BtnId).getElementsByClassName("delete")[0];
-        deleteBtn.addEventListener('click', function () {
-            var TargetBtnId = this.parentNode.parentNode.getAttribute('id');
+        const deleteBtn = document.getElementById(BtnId).getElementsByClassName("delete")[0];
+        deleteBtn.addEventListener('click', function (event) {
+            const TargetBtnId = this.parentNode.parentNode.getAttribute('id');
             // when clicking small icon, don't open the link
-            event.cancelBubble=true;
+            event.cancelBubble = true;
             // Only delete when the value is not null
-            if (val[TargetBtnId] !== null && typeof val[TargetBtnId] !== "undefined"){
+            if (val[TargetBtnId] !== null && typeof val[TargetBtnId] !== "undefined") {
                 // Delete the stored link
                 chrome.storage.sync.remove(TargetBtnId);
                 // delete the icon
-                var favicon = $("#" + TargetBtnId + " img");
+                const favicon = $("#" + TargetBtnId + " img");
                 favicon.attr("src", "#");
                 favicon.css("visibility", "hidden");
             }
         });
 
         // Key clicking
-        var clickBtn = document.getElementById(BtnId);
+        const clickBtn = document.getElementById(BtnId);
         clickBtn.addEventListener('click', function (event) {
-            var TargetBtnId = this.getAttribute('id');
-            chrome.runtime.getBackgroundPage(function(e) {
-                if (event.which == 2 && event.shiftKey) {
-                    // Shift + middle click
-                    e.JumpToLink(TargetBtnId, val['ShiftMiddleClick']);
-                } else if (event.metaKey && event.shiftKey) {
-                    // Command + Shift + click or Ctrl + Shift + click
-                    e.JumpToLink(TargetBtnId, val['CtrlShiftClick']);
-                } else if (event.metaKey || event.ctrlKey) {
-                    //Ctrl + click or Command + click
-                    e.JumpToLink(TargetBtnId, val['CtrlClick']);
-                } else if (event.which == 2) {
-                    // middle click
-                    e.JumpToLink(TargetBtnId, val['MiddleClick']);
-                } else if (event.shiftKey) {
-                    // Shift + click
-                    e.JumpToLink(TargetBtnId, val['ShiftClick']);
-                } else {
-                    // left click
-                    e.JumpToLink(TargetBtnId, val['Click']);
-                }
-            });
+            const TargetBtnId = this.getAttribute('id');
+            const clickType = event.which == 2 && event.shiftKey ? 'ShiftMiddleClick'
+                : event.metaKey && event.shiftKey ? 'CtrlShiftClick'
+                : event.metaKey || event.ctrlKey ? 'CtrlClick'
+                : event.which == 2 ? 'MiddleClick'
+                : event.shiftKey ? 'ShiftClick'
+                : 'Click';
+            JumpToLink(TargetBtnId, val[clickType]);
         });
 
-        (function(btnName) {
+        (function (btnName) {
             // <Key>
             Mousetrap.bind(btnName, function () {
-                chrome.runtime.getBackgroundPage(function(e){e.JumpToLink(BtnPrefix + btnName, val['Key']);});
+                JumpToLink(BtnPrefix + btnName, val['Key']);
                 btnHover(btnName);
             });
 
             // Shift + <Key>
-            Mousetrap.bind('shift+'+btnName, function () {
-                chrome.runtime.getBackgroundPage(function (e){e.JumpToLink(BtnPrefix + btnName, val['ShiftKey']);});
+            Mousetrap.bind('shift+' + btnName, function () {
+                JumpToLink(BtnPrefix + btnName, val['ShiftKey']);
                 btnHover(btnName);
             });
         })(btnName);
 
         // Whether displaying favicon
-        (function(BtnId) {
-            var favicon = $("#" + BtnId + " img");
-            if (val[BtnId] !== null && typeof val[BtnId] !== "undefined"){
+        (function (BtnId) {
+            const favicon = $("#" + BtnId + " img");
+            if (val[BtnId] !== null && typeof val[BtnId] !== "undefined") {
                 favicon.attr("src", "http://www.google.com/s2/favicons?domain=" + val[BtnId]);
                 favicon.css("visibility", "visible");
             }

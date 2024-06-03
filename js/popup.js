@@ -6,8 +6,10 @@ var form = document.querySelector('form');
 // Get the key id
 window.btn = getQueryVariable("btn");
 window.mainTabId = parseInt(getQueryVariable("tabid"));
-chrome.tabs.getSelected(null, function(tab){
-    window.popUpTabId = tab.id
+chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    if (tabs.length > 0) {
+        window.popUpTabId = tabs[0].id;
+    }
 });
 
 function getQueryVariable(variable) {
@@ -36,6 +38,16 @@ input.addEventListener("focus", function() {
     }
 });
 
+// Refresh tab
+function RefreshTab(tabid) {
+    chrome.tabs.reload(tabid);
+}
+
+// Close tab
+function CloseTab(tabid) {
+    chrome.tabs.remove(tabid);
+}
+
 // Get a new link
 form.addEventListener('submit', function(e) {
     // Get input link
@@ -52,13 +64,9 @@ form.addEventListener('submit', function(e) {
         // Store it
         chrome.storage.sync.set(storeLink);
         // Refesh the start page
-        chrome.runtime.getBackgroundPage(function(e){
-            e.RefreshTab(window.mainTabId);
-        });
+        // RefreshTab(window.mainTabId)
         // Close the popup
-        chrome.runtime.getBackgroundPage(function(e){
-            e.CloseTab(window.popUpTabId);
-        });
+        CloseTab(window.popUpTabId);
     }else{
         warning.innerText = 'Please input a valid URL.';
     }
@@ -78,9 +86,7 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
     if (changes[window.btn]) {
         valueChanged(window.btn, changes[window.btn].newValue);
         // Refresh the parent page
-        chrome.runtime.getBackgroundPage(function(e){
-            e.RefreshTab(window.mainTabId);
-        });
+        RefreshTab(window.mainTabId);
     }
 });
 

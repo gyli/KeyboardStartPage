@@ -5,7 +5,7 @@
   "default_locale": "en",
   "version": "0.4.1",
   "minimum_chrome_version": "88",
-  "permissions": [ "storage", "background", "windows", "tabs" ],
+  "permissions": [ "storage", "background" ],
   "background": {
     "service_worker": "service_worker.js",
     "type": "module"

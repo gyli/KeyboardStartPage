@@ -6,6 +6,8 @@ On the page there's only a virtual keyboard and you can set each key to the link
 ## Installation
 Download and install this extension from [Chrome Web Store](https://chrome.google.com/webstore/detail/keyboard-start-page/lcgabkjfibeakijbhicjjilchhmjaiid).
 
+Requires Chrome 88 or later.
+
 ## Screenshots
 ![Screenshot of Keyboard Start Page](https://github.com/ligyxy/KeyboardStartPage/blob/master/screenshot/screenshot-1.png?raw=true)
 

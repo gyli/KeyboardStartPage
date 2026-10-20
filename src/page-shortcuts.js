@@ -3,9 +3,8 @@
 // prefix keys are held, it asks the service worker to open that link.
 // It never reads or changes the page. Uses prefix-shortcut.js, injected first.
 
+// Marked as set up only at the end, so a run that failed halfway can be retried.
 if (!globalThis.keyboardStartPageShortcuts) {
-  globalThis.keyboardStartPageShortcuts = true;
-
   // A copy of the settings it needs, so it can decide during the keydown event.
   let prefix = null;
   let boundKeys = new Set();
@@ -27,4 +26,6 @@ if (!globalThis.keyboardStartPageShortcuts) {
       // The extension was updated or removed since this page loaded.
     }),
   });
+
+  globalThis.keyboardStartPageShortcuts = true;
 }

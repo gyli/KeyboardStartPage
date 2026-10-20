@@ -18,7 +18,16 @@ const ALL_SITES = { origins: ['<all_urls>'] };
 async function updatePageScript() {
   const { pageShortcuts } = await chrome.storage.sync.get('pageShortcuts');
   const wanted = Boolean(pageShortcuts) && (await chrome.permissions.contains(ALL_SITES));
-  const registered = (await chrome.scripting.getRegisteredContentScripts({ ids: [PAGE_SCRIPT.id] })).length > 0;
+
+  // Chrome keeps registered scripts across extension updates. Remove any left by
+  // an older version, or registered with a different file list, so they can't
+  // run outdated code.
+  const scripts = await chrome.scripting.getRegisteredContentScripts();
+  const isCurrent = (script) => script.id === PAGE_SCRIPT.id && JSON.stringify(script.js) === JSON.stringify(PAGE_SCRIPT.js);
+  const stale = scripts.filter((script) => !isCurrent(script) || !wanted);
+  if (stale.length) await chrome.scripting.unregisterContentScripts({ ids: stale.map((script) => script.id) });
+  const registered = scripts.some(isCurrent) && wanted;
+
   if (wanted && !registered) {
     await chrome.scripting.registerContentScripts([PAGE_SCRIPT]);
     // Registered scripts only run on pages loaded from now on, so add it to open tabs too.
@@ -28,7 +37,6 @@ async function updatePageScript() {
       });
     }
   }
-  if (!wanted && registered) await chrome.scripting.unregisterContentScripts({ ids: [PAGE_SCRIPT.id] });
 }
 
 // Updates run one at a time, so two events in a row can't register the script twice.

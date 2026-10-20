@@ -95,19 +95,45 @@ test('turning on shortcuts asks for website access, and turning off removes it',
   // Stand in for Chrome's permission prompt, which tests can't click.
   await page.evaluate(() => {
     window.permissionCalls = [];
-    chrome.permissions.request = async (p) => { permissionCalls.push(['request', p.origins]); return true; };
-    chrome.permissions.remove = async (p) => { permissionCalls.push(['remove', p.origins]); return true; };
+    let granted = false;
+    chrome.permissions.request = async (p) => { permissionCalls.push(['request', p.origins]); granted = true; return true; };
+    chrome.permissions.remove = async (p) => { permissionCalls.push(['remove', p.origins]); granted = false; return true; };
+    chrome.permissions.contains = async () => granted;
   });
   const toggle = page.getByRole('switch', { name: /Use a shortcut on websites/ });
 
-  await toggle.check();
+  // The switch turns on only after access is granted, so click instead of check().
+  await toggle.click();
   await expect(page.locator('#toast')).toHaveText(/Turned on/);
+  await expect(toggle).toBeChecked();
   expect(await storage(page)).toMatchObject({ pageShortcuts: true });
 
   await toggle.uncheck();
   await expect(page.locator('#toast')).toHaveText('Turned off');
   expect(await storage(page)).toMatchObject({ pageShortcuts: false });
   expect(await page.evaluate(() => permissionCalls)).toEqual([['request', ['<all_urls>']], ['remove', ['<all_urls>']]]);
+});
+
+test('the switch stays off while Chrome is still asking for access', async ({ seed, open }) => {
+  await seed({});
+  const page = await open('options.html');
+  // Chrome's prompt is open and the user hasn't answered yet.
+  await page.evaluate(() => { chrome.permissions.request = () => new Promise(() => {}); });
+  const toggle = page.getByRole('switch', { name: /Use a shortcut on websites/ });
+  await toggle.click();
+  await expect(page.locator('#toast')).toHaveText(/Choose Allow/);
+  await expect(toggle).not.toBeChecked();
+  expect(await storage(page)).not.toHaveProperty('pageShortcuts');
+});
+
+test('a failed access request is reported', async ({ seed, open }) => {
+  await seed({});
+  const page = await open('options.html');
+  await page.evaluate(() => { chrome.permissions.request = async () => { throw new Error('Something went wrong'); }; });
+  const toggle = page.getByRole('switch', { name: /Use a shortcut on websites/ });
+  await toggle.click();
+  await expect(page.locator('#toast')).toHaveText('Couldn’t turn on: Something went wrong');
+  await expect(toggle).not.toBeChecked();
 });
 
 test('declining website access keeps shortcuts off', async ({ seed, open }) => {
@@ -117,7 +143,7 @@ test('declining website access keeps shortcuts off', async ({ seed, open }) => {
   const toggle = page.getByRole('switch', { name: /Use a shortcut on websites/ });
   // The switch flips back off once access is declined, so click instead of check().
   await toggle.click();
-  await expect(page.locator('#toast')).toHaveText(/needs access to websites/);
+  await expect(page.locator('#toast')).toHaveText(/access to websites wasn’t allowed/);
   await expect(toggle).not.toBeChecked();
   expect(await storage(page)).not.toHaveProperty('pageShortcuts');
 });
@@ -186,6 +212,37 @@ test.describe('with access to websites', () => {
 
     await seed({});
     await expect.poll(() => registeredScripts(serviceWorker)).toEqual([]);
+  });
+
+  test('the switch stays on after the prefix changes and after a reload', async ({ seed, open }) => {
+    await seed({ li_g: SITE });
+    const page = await open('options.html');
+    const toggle = page.getByRole('switch', { name: /Use a shortcut on websites/ });
+    await toggle.click();
+    await expect(toggle).toBeChecked();
+
+    await page.getByRole('button', { name: 'Record' }).click();
+    await page.keyboard.down('Alt');
+    await page.keyboard.down('p');
+    await page.keyboard.up('p');
+    await page.keyboard.up('Alt');
+    await expect.poll(async () => (await storage(page)).shortcutPrefix).toBe('Alt+KeyP');
+    await expect(toggle).toBeChecked();
+
+    await page.reload();
+    await expect(toggle).toBeChecked();
+    expect(await storage(page)).toMatchObject({ pageShortcuts: true });
+  });
+
+  test('a script left registered by an older version is replaced', async ({ serviceWorker, seed }) => {
+    await serviceWorker.evaluate(() => chrome.scripting.registerContentScripts([
+      { id: 'page-shortcuts', js: ['src/page-shortcuts.js'], matches: ['<all_urls>'] },
+      { id: 'launcher', js: ['src/page-shortcuts.js'], matches: ['<all_urls>'] },
+    ]));
+    await seed({ pageShortcuts: true });
+    await expect.poll(() => serviceWorker.evaluate(async () =>
+      (await chrome.scripting.getRegisteredContentScripts()).map((script) => [script.id, script.js])))
+      .toEqual([['page-shortcuts', ['src/prefix-shortcut.js', 'src/page-shortcuts.js']]]);
   });
 
   test('holding Ctrl + X + P and tapping a key opens its link from a web page', async ({ context, serviceWorker, site, seed }) => {

@@ -141,7 +141,7 @@ function renderKeycaps(labels) {
 function renderPrefix({ pageShortcuts, shortcutPrefix, links }) {
   currentPrefix = prefixShortcut.parse(shortcutPrefix) ? shortcutPrefix : DEFAULT_PREFERENCES.shortcutPrefix;
   exampleKey = ([...KEYS].find((key) => links[key]) ?? 'g').toUpperCase();
-  $('page-shortcuts').checked = pageShortcuts;
+  renderPageShortcutsSwitch(pageShortcuts);
   if (recording) return;
 
   const { modifiers, keys } = prefixShortcut.parse(currentPrefix);
@@ -204,28 +204,41 @@ async function handleRecordingKeyup(event) {
 }
 
 function changePageShortcuts(event) {
-  if (!event.target.checked) {
+  const toggle = event.target;
+  if (!toggle.checked) {
     chrome.permissions.remove(ALL_SITES);
     save(setPreference('pageShortcuts', false), 'Turned off');
     return;
   }
+  // The switch stays off until Chrome grants access and the setting is saved.
+  toggle.checked = false;
+  showToast('Chrome is asking for access to websites. Choose Allow to turn this on.', 10_000);
   // Ask right away: Chrome only shows the prompt during a user action.
-  chrome.permissions.request(ALL_SITES).then((granted) => {
-    if (granted) {
-      save(setPreference('pageShortcuts', true), `Turned on. Try holding ${prefixShortcut.format(currentPrefix, IS_MAC)} and pressing ${exampleKey} on any website.`);
-    } else {
-      event.target.checked = false;
-      showToast('This needs access to websites to work.');
-    }
-  });
+  chrome.permissions.request(ALL_SITES)
+    .then(async (granted) => {
+      if (!granted) {
+        showToast('Not turned on, because access to websites wasn’t allowed.');
+        return;
+      }
+      await setPreference('pageShortcuts', true);
+      toggle.checked = true;
+      showToast(`Turned on. Hold ${prefixShortcut.format(currentPrefix, IS_MAC)} and press ${exampleKey} on any website.`, 5000);
+    })
+    .catch((error) => showToast(`Couldn’t turn on: ${error.message}`, 5000));
+}
+
+// On only when the setting is saved and Chrome still grants access, which the
+// user can take away on chrome://extensions.
+async function renderPageShortcutsSwitch(pageShortcuts) {
+  $('page-shortcuts').checked = pageShortcuts && (await chrome.permissions.contains(ALL_SITES));
 }
 
 let toastTimer;
-function showToast(message) {
+function showToast(message, duration = 2000) {
   toast.textContent = message;
   toast.classList.add('visible');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('visible'), 2000);
+  toastTimer = setTimeout(() => toast.classList.remove('visible'), duration);
 }
 
 async function save(promise, message = 'Saved') {
@@ -260,6 +273,8 @@ buildShortcuts();
 onSettingsChanged(render);
 onWallpaperChanged(renderWallpaper);
 $('page-shortcuts').addEventListener('change', changePageShortcuts);
+// Access may have changed on chrome://extensions while this page was in the background.
+window.addEventListener('focus', () => !recording && loadSettings().then(render));
 $('prefix-record').addEventListener('click', () => (recording ? stopRecording() : startRecording()));
 document.addEventListener('keydown', handleRecordingKeydown, true);
 document.addEventListener('keyup', handleRecordingKeyup, true);

@@ -70,6 +70,28 @@
     </section>
 
     <section class="card">
+      <h2>Keyboard on the new tab page</h2>
+      <div id="shortcuts" class="shortcuts"></div>
+      <p class="description">Clicking a key works like any link: Ctrl/⌘ + click or middle click opens it in a new tab, and Shift + click opens a new window.</p>
+    </section>
+
+    <section class="card">
+      <h2>Your links</h2>
+      <p class="description">To add or change a link, click a key on the new tab page, or drop a link on it.</p>
+      <ul id="links" class="links"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Backup</h2>
+      <p class="description">Save your links and settings to a file, or restore them from one. Restoring replaces everything.</p>
+      <div class="inline">
+        <button id="export" class="button" type="button">Export</button>
+        <button id="import-button" class="button" type="button">Import</button>
+        <input id="import" type="file" accept="application/json,.json" hidden>
+      </div>
+    </section>
+
+    <section class="card">
       <h2>Open links from any page</h2>
       <label class="field toggle">
         <span>
@@ -90,28 +112,6 @@
         <span class="field-label">Open links</span>
         <select id="prefix-open-mode" class="open-mode-select"></select>
       </label>
-    </section>
-
-    <section class="card">
-      <h2>Keyboard shortcuts</h2>
-      <div id="shortcuts" class="shortcuts"></div>
-      <p class="description">Clicking a key works like any link: Ctrl/⌘ + click or middle click opens it in a new tab, and Shift + click opens a new window.</p>
-    </section>
-
-    <section class="card">
-      <h2>Your links</h2>
-      <p class="description">To add or change a link, click a key on the new tab page, or drop a link on it.</p>
-      <ul id="links" class="links"></ul>
-    </section>
-
-    <section class="card">
-      <h2>Backup</h2>
-      <p class="description">Save your links and settings to a file, or restore them from one. Restoring replaces everything.</p>
-      <div class="inline">
-        <button id="export" class="button" type="button">Export</button>
-        <button id="import-button" class="button" type="button">Import</button>
-        <input id="import" type="file" accept="application/json,.json" hidden>
-      </div>
     </section>
   </main>
 

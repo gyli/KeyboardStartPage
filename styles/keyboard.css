@@ -84,16 +84,16 @@
 
 .key:hover .key-icon { opacity: 0.4; }
 
-/* The optional name sits in the bottom-right corner, opposite the icon,
+/* The optional name sits low in the bottom-right corner, opposite the icon,
    in the keycap's own text color. Long names end with an ellipsis. */
 .key-name {
   position: absolute;
   left: calc(var(--size) * 1.25 + 3px);
   right: 4px;
-  bottom: calc(var(--size) / 4);
+  bottom: 3px;
   overflow: hidden;
   color: var(--cap-text);
-  font: 500 clamp(7.5px, calc(var(--key-height) * 0.17), 9px) / var(--size) var(--font);
+  font: 500 clamp(7px, calc(var(--key-height) * 0.14), 8px) / 1 var(--font);
   letter-spacing: -0.01em;
   text-align: right;
   text-overflow: ellipsis;

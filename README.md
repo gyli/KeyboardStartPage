@@ -2,7 +2,7 @@
 
 A Chrome new tab page that shows a keyboard. Give each key a website, then press the key to open it.
 
-![Keyboard Start Page](screenshot/screenshot-1.png)
+![Keyboard Start Page](screenshot/store-1280x800.png)
 
 ## Install
 

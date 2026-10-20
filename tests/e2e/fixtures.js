@@ -12,7 +12,7 @@ const iconPng = readFileSync(path.join(root, 'icons/icon-32.png'));
 export const SITE = 'https://site.example.test/';
 
 // A copy of the extension with access to all websites already granted. Playwright
-// can't click Chrome's permission prompt, so tests of the launcher script use this.
+// can't click Chrome's permission prompt, so tests of the page shortcuts script use this.
 function copyWithAllSitesAccess() {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'ksp-'));
   const skip = ['node_modules', '.git', 'tests', 'test-results', 'dist'];

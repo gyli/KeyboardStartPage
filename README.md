@@ -39,7 +39,7 @@ Run `npm install` once, then `npm test`. Unit tests (`tests/unit`) use Node's bu
 | Path | What it is |
 |---|---|
 | `newtab.html`, `src/newtab.js` | The new tab page |
-| `popup.html`, `src/popup.js` | The quick launcher popup |
+| `popup.html`, `src/popup.js` | The toolbar popup |
 | `options.html`, `src/options.js` | The settings page |
 | `src/keyboard.js`, `styles/keyboard.css` | The keyboard, shared by the new tab page and the popup |
 | `src/editor.js` | The edit link dialog |

@@ -61,17 +61,8 @@ function openKey(key, trigger) {
   else showToast(`${key.toUpperCase()} has no link yet. Click the key to add one.`);
 }
 
-// The prefix shortcut works here too, the same as on web pages.
-// prefixShortcut comes from prefix-shortcut.js.
-const handlePrefixShortcut = prefixShortcut.createMatcher({
-  getPrefix: () => (settings.pageShortcuts ? settings.shortcutPrefix : null),
-  isBound: (key) => Boolean(settings.links[key]),
-  onOpen: (key) => openKey(key, 'Key'),
-  onWaiting: () => showToast('Now press a key'),
-});
-
 function handleKeydown(event) {
-  if (editor.isOpen || event.repeat || handlePrefixShortcut(event)) return;
+  if (editor.isOpen || event.repeat) return;
   const key = keyFromEvent(event);
   if (!key) return;
   event.preventDefault();
@@ -92,6 +83,15 @@ const keyboard = createKeyboard(document.getElementById('keyboard'), {
   onDropUrl: handleDropUrl,
 });
 const editor = createEditor();
+
+// The prefix shortcut works here too, the same as on web pages. It listens on
+// window in the capture phase, so it runs before handleKeydown and stops
+// events it uses. prefixShortcut comes from prefix-shortcut.js.
+prefixShortcut.listen({
+  getPrefix: () => (settings.pageShortcuts && !editor.isOpen ? settings.shortcutPrefix : null),
+  isBound: (key) => Boolean(settings.links[key]),
+  onOpen: (key) => openKey(key, 'Key'),
+});
 
 if (!(await maybeTakeFocus())) {
   render();

@@ -117,84 +117,90 @@ async function chooseWallpaper(file) {
 // prefixShortcut comes from prefix-shortcut.js.
 const ALL_SITES = { origins: ['<all_urls>'] };
 const IS_MAC = navigator.platform.startsWith('Mac');
-const MODIFIER_NAMES = IS_MAC
-  ? { Ctrl: '⌃ Control', Alt: '⌥ Option', Shift: '⇧ Shift', Meta: '⌘ Command' }
-  : { Ctrl: 'Ctrl', Alt: 'Alt', Shift: 'Shift', Meta: 'Win' };
 let currentPrefix = DEFAULT_PREFERENCES.shortcutPrefix;
-let recordingKey = false;
+let exampleKey = 'G';
+let recording = null; // { pressed, modifiers, keys } while recording
 
-function buildPrefixBuilder() {
-  for (const modifier of prefixShortcut.MODIFIERS) {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'chip';
-    chip.dataset.modifier = modifier;
-    chip.textContent = MODIFIER_NAMES[modifier];
-    chip.addEventListener('click', () => toggleModifier(modifier));
-    $('prefix-modifiers').append(chip);
-  }
+// Keycap labels, e.g. "⌃ Control" on a Mac, like the printed keys.
+const KEYCAP_NAMES = IS_MAC ? { Ctrl: '⌃ Control', Alt: '⌥ Option', Shift: '⇧ Shift', Meta: '⌘ Command' } : {};
+const keycapLabels = (modifiers, keys) => [
+  ...prefixShortcut.MODIFIERS.filter((m) => modifiers.includes(m)).map((m) => KEYCAP_NAMES[m] ?? prefixShortcut.modifierLabel(m, IS_MAC)),
+  ...keys.map(prefixShortcut.keyLabel),
+];
+
+// Shows labels as keycaps: ⌃ + X + P.
+function renderKeycaps(labels) {
+  const container = $('prefix-keys');
+  container.replaceChildren();
+  labels.forEach((label, index) => {
+    if (index) container.append(Object.assign(document.createElement('span'), { className: 'plus', textContent: '+' }));
+    container.append(Object.assign(document.createElement('kbd'), { textContent: label }));
+  });
 }
 
 function renderPrefix({ pageShortcuts, shortcutPrefix, links }) {
   currentPrefix = prefixShortcut.parse(shortcutPrefix) ? shortcutPrefix : DEFAULT_PREFERENCES.shortcutPrefix;
-  const { modifiers, key } = prefixShortcut.parse(currentPrefix);
+  exampleKey = ([...KEYS].find((key) => links[key]) ?? 'g').toUpperCase();
   $('page-shortcuts').checked = pageShortcuts;
-  for (const chip of $('prefix-modifiers').children) {
-    chip.setAttribute('aria-pressed', modifiers.includes(chip.dataset.modifier));
-  }
-  if (!recordingKey) $('prefix-key').textContent = key ? prefixShortcut.keyLabel(key) : 'Add key';
-  $('prefix-key').classList.toggle('empty', !key);
-  $('prefix-key-clear').hidden = !key;
+  if (recording) return;
 
-  const shortcut = prefixShortcut.format(currentPrefix, IS_MAC);
-  const example = ([...KEYS].find((k) => links[k]) ?? 'g').toUpperCase();
-  const joiner = IS_MAC ? '' : ' + ';
-  $('prefix-example').textContent = key
-    ? `On any website, press ${shortcut}, then ${example} to open the link on ${example}.`
-    : `On any website, press ${shortcut}${joiner}${example} to open the link on ${example}.`;
+  const { modifiers, keys } = prefixShortcut.parse(currentPrefix);
+  renderKeycaps(keycapLabels(modifiers, keys));
+  $('prefix-keys').classList.remove('recording');
+  $('prefix-record').textContent = 'Record';
+  $('prefix-example').textContent =
+    `On any website, hold ${prefixShortcut.format(currentPrefix, IS_MAC)} and press ${exampleKey} to open the link on ${exampleKey}.`;
+
+  $('prefix-note').textContent = keys.length
+    ? `Holding several letters together doesn't work on every keyboard. While the prefix is held, ${keys.map(prefixShortcut.keyLabel).join(' and ')} won't type on websites.`
+    : 'Click Record, hold the keys you want together, then let go.';
 }
 
-function savePrefix(prefix) {
-  return save(setPreference('shortcutPrefix', prefix), `Prefix is now ${prefixShortcut.format(prefix, IS_MAC)}`);
+function startRecording() {
+  recording = { pressed: new Set(), modifiers: new Set(), keys: [] };
+  $('prefix-keys').classList.add('recording');
+  $('prefix-keys').textContent = 'Hold your keys together, then let go…';
+  $('prefix-record').textContent = 'Cancel';
+  $('prefix-note').textContent = 'Use Control, Option or Command, plus up to 3 other keys. Esc cancels.';
 }
 
-function toggleModifier(modifier) {
-  const prefix = prefixShortcut.parse(currentPrefix);
-  const modifiers = prefix.modifiers.includes(modifier)
-    ? prefix.modifiers.filter((m) => m !== modifier)
-    : [...prefix.modifiers, modifier];
-  const next = prefixShortcut.serialize({ modifiers, key: prefix.key });
-  if (!prefixShortcut.parse(next)) {
-    showToast(`The prefix needs ${MODIFIER_NAMES.Ctrl}, ${MODIFIER_NAMES.Alt} or ${MODIFIER_NAMES.Meta}.`);
-    return;
-  }
-  savePrefix(next);
-}
-
-function startRecordingKey() {
-  recordingKey = true;
-  $('prefix-key').textContent = 'Press a key…';
-  $('prefix-key').classList.add('recording');
-}
-
-async function stopRecordingKey() {
-  recordingKey = false;
-  $('prefix-key').classList.remove('recording');
+async function stopRecording() {
+  recording = null;
   renderPrefix(await loadSettings());
 }
 
-// While recording, the next key press becomes the prefix's extra key.
-// Escape cancels; Backspace or Delete removes the key.
-async function handleRecordingKeydown(event) {
-  if (!recordingKey || ['Control', 'Alt', 'Shift', 'Meta', 'OS'].includes(event.key)) return;
+function handleRecordingKeydown(event) {
+  if (!recording) return;
   event.preventDefault();
   event.stopPropagation();
-  const { modifiers } = prefixShortcut.parse(currentPrefix);
-  if (event.key === 'Escape') return stopRecordingKey();
-  const key = ['Backspace', 'Delete'].includes(event.key) ? null : event.code;
-  recordingKey = false;
-  await savePrefix(prefixShortcut.serialize({ modifiers, key }));
-  await stopRecordingKey();
+  if (event.repeat) return;
+  if (event.code === 'Escape' && !recording.pressed.size) return stopRecording();
+  const modifier = prefixShortcut.modifierFromCode(event.code);
+  if (modifier) recording.modifiers.add(modifier);
+  else if (!recording.keys.includes(event.code) && recording.keys.length < prefixShortcut.MAX_KEYS) recording.keys.push(event.code);
+  recording.pressed.add(event.code);
+  renderKeycaps(keycapLabels([...recording.modifiers], recording.keys));
+}
+
+// The prefix is everything held before all keys were let go.
+async function handleRecordingKeyup(event) {
+  if (!recording) return;
+  event.preventDefault();
+  recording.pressed.delete(event.code);
+  // While ⌘ is held, macOS doesn't send keyup for other keys.
+  if (prefixShortcut.modifierFromCode(event.code) === 'Meta') {
+    for (const code of recording.pressed) if (!prefixShortcut.modifierFromCode(code)) recording.pressed.delete(code);
+  }
+  if (recording.pressed.size) return;
+
+  const prefix = prefixShortcut.serialize({ modifiers: [...recording.modifiers], keys: recording.keys });
+  if (!prefixShortcut.parse(prefix)) {
+    showToast(IS_MAC ? 'Include ⌃ Control, ⌥ Option or ⌘ Command.' : 'Include Ctrl, Alt or Win.');
+    return startRecording();
+  }
+  recording = null;
+  await save(setPreference('shortcutPrefix', prefix), `Prefix is now ${prefixShortcut.format(prefix, IS_MAC)}`);
+  renderPrefix(await loadSettings());
 }
 
 function changePageShortcuts(event) {
@@ -206,7 +212,7 @@ function changePageShortcuts(event) {
   // Ask right away: Chrome only shows the prompt during a user action.
   chrome.permissions.request(ALL_SITES).then((granted) => {
     if (granted) {
-      save(setPreference('pageShortcuts', true), `Turned on. Try ${prefixShortcut.format(currentPrefix, IS_MAC)} on any website.`);
+      save(setPreference('pageShortcuts', true), `Turned on. Try holding ${prefixShortcut.format(currentPrefix, IS_MAC)} and pressing ${exampleKey} on any website.`);
     } else {
       event.target.checked = false;
       showToast('This needs access to websites to work.');
@@ -253,15 +259,12 @@ async function restoreBackup(file) {
 buildShortcuts();
 onSettingsChanged(render);
 onWallpaperChanged(renderWallpaper);
-buildPrefixBuilder();
 $('page-shortcuts').addEventListener('change', changePageShortcuts);
-$('prefix-key').addEventListener('click', startRecordingKey);
-$('prefix-key').addEventListener('blur', () => recordingKey && stopRecordingKey());
-$('prefix-key-clear').addEventListener('click', () => {
-  const { modifiers } = prefixShortcut.parse(currentPrefix);
-  savePrefix(prefixShortcut.serialize({ modifiers, key: null }));
-});
+$('prefix-record').addEventListener('click', () => (recording ? stopRecording() : startRecording()));
 document.addEventListener('keydown', handleRecordingKeydown, true);
+document.addEventListener('keyup', handleRecordingKeyup, true);
+// Keys let go while the page isn't focused never send keyup.
+window.addEventListener('blur', () => recording && stopRecording());
 
 for (const radio of document.querySelectorAll('input[name="theme"]')) {
   radio.addEventListener('change', () => save(setPreference('theme', radio.value)));

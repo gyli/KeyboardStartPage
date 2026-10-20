@@ -63,11 +63,11 @@ test('pressing a key opens its link, and Shift opens it in the background', asyn
 });
 
 test('the shortcut prefix works on the new tab page too', async ({ site, seed, open }) => {
-  await seed({ li_e: site, pageShortcuts: true, shortcutPrefix: 'Ctrl+Alt+KeyP' });
+  await seed({ li_e: site, pageShortcuts: true, shortcutPrefix: 'Alt+KeyP' });
   const page = await open('newtab.html');
   await expect(key(page, 'e')).toHaveClass(/bound/);
-  await page.keyboard.press('Control+Alt+P');
-  await expect(page.locator('#toast')).toHaveText('Now press a key');
+  await page.keyboard.down('Alt');
+  await page.keyboard.down('p');
   await page.keyboard.press('e');
   await expect(page).toHaveURL(site);
 });

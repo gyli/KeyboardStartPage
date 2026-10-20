@@ -1,6 +1,6 @@
 // Runs on web pages only while "Open links from any page" is on and the user
-// has allowed access to websites. When the prefix shortcut for a key with a
-// link is pressed, it asks the service worker to open that link.
+// has allowed access to websites. When a key with a link is tapped while the
+// prefix keys are held, it asks the service worker to open that link.
 // It never reads or changes the page. Uses prefix-shortcut.js, injected first.
 
 if (!globalThis.keyboardStartPageShortcuts) {
@@ -19,14 +19,12 @@ if (!globalThis.keyboardStartPageShortcuts) {
     if (area === 'sync') chrome.storage.sync.get(null).then(update);
   });
 
-  const handleKeydown = prefixShortcut.createMatcher({
+  // Listens in the capture phase on window, so pages can't swallow the shortcut first.
+  prefixShortcut.listen({
     getPrefix: () => prefix,
     isBound: (key) => boundKeys.has(key),
     onOpen: (key) => chrome.runtime.sendMessage({ type: 'open-key', key }).catch(() => {
       // The extension was updated or removed since this page loaded.
     }),
   });
-
-  // Capture phase on window, so pages can't swallow the shortcut first.
-  window.addEventListener('keydown', handleKeydown, true);
 }

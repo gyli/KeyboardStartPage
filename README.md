@@ -13,7 +13,7 @@ Get it from the [Chrome Web Store](https://chromewebstore.google.com/detail/keyb
 - **Add a link:** click an empty key and type the address, or drag a link (from a page, the address bar or the bookmarks bar) onto a key. You can give a key an optional name, shown in the key's corner.
 - **Change or remove a link:** hover a key and click the pencil.
 - **Open a link:** press the key, or click it.
-- **Open links from any page:** turn on "Use a shortcut on websites" in settings (Chrome asks once for access to websites) and build a prefix from Ctrl/⌃, Alt/⌥, Shift and ⌘/Win, plus an optional key. With modifiers only, prefix + X opens the link on X, e.g. ⌥ + G. With a key, it takes two steps: press the prefix, e.g. ⌃⌘P, then X. It doesn't work on Chrome's own pages or the Chrome Web Store.
+- **Open links from any page:** turn on "Use a shortcut on websites" in settings (Chrome asks once for access to websites), then record a prefix: click Record, hold the keys together, and let go. The prefix needs Ctrl/⌃, Alt/⌥ or ⌘/Win, plus up to 3 other keys. While the prefix is held, tap a key to open its link, e.g. hold ⌥ and press G, or hold ⌃ + X + P and press G. It doesn't work on Chrome's own pages or the Chrome Web Store.
 - **Toolbar popup:** click the extension's icon to open the keyboard over any page. Pressing an empty key there offers to add the page you're on.
 - **Wallpaper, theme and more:** click the gear in the bottom right corner.
 
@@ -44,7 +44,7 @@ Run `npm install` once, then `npm test`. Unit tests (`tests/unit`) use Node's bu
 | `src/keyboard.js`, `styles/keyboard.css` | The keyboard, shared by the new tab page and the popup |
 | `src/editor.js` | The edit link dialog |
 | `src/open.js` | Opens links in the chosen tab or window |
-| `src/prefix-shortcut.js` | Prefix shortcut format and matching, shared by web pages, the new tab page and settings |
+| `src/prefix-shortcut.js` | Prefix format and the held-keys listener, shared by web pages, the new tab page and settings |
 | `src/page-shortcuts.js` | Prefix shortcuts on web pages |
 | `src/storage.js` | Settings: defaults, loading, saving, migration, backup, wallpaper |
 | `src/url.js` | URL cleanup and display helpers |

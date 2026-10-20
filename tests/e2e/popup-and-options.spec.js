@@ -122,36 +122,42 @@ test('declining website access keeps shortcuts off', async ({ seed, open }) => {
   expect(await storage(page)).not.toHaveProperty('pageShortcuts');
 });
 
-test('the prefix is built from modifier chips and an optional key', async ({ seed, open }) => {
+test('the prefix is recorded by holding keys together', async ({ seed, open }) => {
   await seed({ li_g: SITE });
   const page = await open('options.html');
-  const chip = (modifier) => page.locator(`#prefix-modifiers [data-modifier="${modifier}"]`);
   const prefix = async () => (await storage(page)).shortcutPrefix;
+  const keycaps = page.locator('#prefix-keys kbd');
 
-  // Default is Alt.
-  await expect(chip('Alt')).toHaveAttribute('aria-pressed', 'true');
-  await chip('Ctrl').click();
-  await expect.poll(prefix).toBe('Ctrl+Alt');
-  await chip('Alt').click();
-  await expect.poll(prefix).toBe('Ctrl');
+  await page.getByRole('button', { name: 'Record' }).click();
+  await expect(page.locator('#prefix-keys')).toHaveText(/Hold your keys/);
+  await page.keyboard.down('Control');
+  await page.keyboard.down('x');
+  await page.keyboard.down('p');
+  await expect(keycaps).toHaveCount(3); // shown while held
+  await page.keyboard.up('p');
+  await page.keyboard.up('x');
+  await page.keyboard.up('Control');
 
-  // Removing the last of Ctrl/Alt/Meta isn't allowed.
-  await chip('Ctrl').click();
-  await expect(page.locator('#toast')).toHaveText(/The prefix needs/);
-  await expect.poll(prefix).toBe('Ctrl');
+  await expect.poll(prefix).toBe('Ctrl+KeyX+KeyP');
+  await expect(keycaps).toHaveText([/Ctrl|⌃/, 'X', 'P']);
+  await expect(page.locator('#prefix-example')).toHaveText(/hold .* and press G to open the link on G/);
+  await expect(page.locator('#prefix-note')).toHaveText(/X and P won't type/);
+});
 
-  await chip('Meta').click();
-  await page.locator('#prefix-key').click();
-  await expect(page.locator('#prefix-key')).toHaveText('Press a key…');
-  await page.keyboard.press('Shift'); // modifiers alone are ignored
-  await page.keyboard.press('p');
-  await expect.poll(prefix).toBe('Ctrl+Meta+KeyP');
-  await expect(page.locator('#prefix-key')).toHaveText('P');
-  await expect(page.locator('#prefix-example')).toHaveText(/, then G to open the link on G/);
-
-  await page.locator('#prefix-key-clear').click();
-  await expect.poll(prefix).toBe('Ctrl+Meta');
-  await expect(page.locator('#prefix-key')).toHaveText('Add key');
+test('a prefix without Control, Option or Command is rejected', async ({ seed, open }) => {
+  await seed({});
+  const page = await open('options.html');
+  await page.getByRole('button', { name: 'Record' }).click();
+  await page.keyboard.down('Shift');
+  await page.keyboard.down('x');
+  await page.keyboard.up('x');
+  await page.keyboard.up('Shift');
+  await expect(page.locator('#toast')).toHaveText(/Include/);
+  // Still recording, so the user can try again; Esc cancels.
+  await expect(page.locator('#prefix-keys')).toHaveText(/Hold your keys/);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#prefix-record')).toHaveText('Record');
+  expect(await storage(page)).not.toHaveProperty('shortcutPrefix');
 });
 
 test.describe('with access to websites', () => {
@@ -182,15 +188,20 @@ test.describe('with access to websites', () => {
     await expect.poll(() => registeredScripts(serviceWorker)).toEqual([]);
   });
 
-  test('a two-step prefix opens the link from a web page', async ({ context, serviceWorker, site, seed }) => {
-    await seed({ li_e: `${site}target`, pageShortcuts: true, shortcutPrefix: 'Ctrl+Shift+KeyP' });
+  test('holding Ctrl + X + P and tapping a key opens its link from a web page', async ({ context, serviceWorker, site, seed }) => {
+    await seed({ li_e: `${site}target`, pageShortcuts: true, shortcutPrefix: 'Ctrl+KeyX+KeyP' });
     await expect.poll(() => registeredScripts(serviceWorker)).toEqual(['page-shortcuts']);
     const page = await context.newPage();
     await page.goto(`${site}start`);
 
     await expect(async () => {
-      await page.keyboard.press('Control+Shift+P');
+      await page.keyboard.down('Control');
+      await page.keyboard.down('x');
+      await page.keyboard.down('p');
       await page.keyboard.press('e');
+      await page.keyboard.up('p');
+      await page.keyboard.up('x');
+      await page.keyboard.up('Control');
       await expect(page).toHaveURL(`${site}target`, { timeout: 1000 });
     }).toPass();
   });

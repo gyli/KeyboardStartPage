@@ -80,14 +80,11 @@
       </label>
       <div class="field stacked">
         <span class="field-label">Shortcut prefix</span>
-        <div class="prefix-builder">
-          <div id="prefix-modifiers" class="chips" role="group" aria-label="Modifier keys"></div>
-          <span class="plus" aria-hidden="true">+</span>
-          <button id="prefix-key" class="chip key-chip" type="button" title="Optional: a key to press after the modifiers, before the link's key"></button>
-          <button id="prefix-key-clear" class="icon-button small" type="button" title="Remove this key" aria-label="Remove this key" hidden>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
-          </button>
+        <div class="prefix-recorder">
+          <div id="prefix-keys" class="prefix-keys" aria-live="polite"></div>
+          <button id="prefix-record" class="button" type="button">Record</button>
         </div>
+        <span id="prefix-note" class="description"></span>
       </div>
     </section>
 

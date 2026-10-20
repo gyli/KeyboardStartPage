@@ -1,0 +1,165 @@
+/* Shared design tokens and controls for every page.
+   light-dark() picks a value from color-scheme, which data-theme overrides. */
+
+:root {
+  color-scheme: light dark;
+
+  --bg: light-dark(#f4f4f5, #141416);
+  --surface: light-dark(#ffffff, #232327);
+  --surface-hover: light-dark(#fafafa, #2a2a2f);
+  --border: light-dark(#e4e4e7, #34343a);
+  --text: light-dark(#18181b, #f4f4f5);
+  --muted: light-dark(#71717a, #a1a1aa);
+  --accent: light-dark(#2563eb, #60a5fa);
+  --accent-text: light-dark(#ffffff, #0b1220);
+  --danger: light-dark(#dc2626, #f87171);
+  --shadow: light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.4));
+
+  --radius: 12px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Set from the options page; falls back to the theme background. */
+  --page-bg: var(--bg);
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Component styles set display, which would otherwise override the hidden attribute. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page-bg);
+  color: var(--text);
+  font: 15px/1.5 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 0 0.4em;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--surface);
+  font: 600 0.85em/1.6 var(--font);
+  text-align: center;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.button {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: 500 14px var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover { background: var(--surface-hover); }
+  &.primary { border-color: var(--accent); background: var(--accent); color: var(--accent-text); }
+  &.primary:hover { filter: brightness(1.08); }
+  &.danger { color: var(--danger); }
+}
+
+input[type="text"], input[type="url"] {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px var(--font);
+
+  &:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+}
+
+/* Dropdowns look like .button, with a small arrow instead of Chrome's own. */
+select {
+  appearance: none;
+  height: 36px;
+  padding: 0 34px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%238a8a93' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center / 12px;
+  color: var(--text);
+  font: 500 14px var(--font);
+  cursor: pointer;
+
+  &:hover { background-color: var(--surface-hover); }
+  &:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+
+  &:hover { background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text); }
+  & svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+}
+
+.icon-button.small {
+  width: 28px;
+  height: 28px;
+
+  & svg { width: 16px; height: 16px; }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  translate: -50% 16px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, translate 0.2s;
+
+  &.visible { opacity: 1; translate: -50% 0; }
+}
+
+.dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 64px var(--shadow);
+
+  &::backdrop { background: rgb(0 0 0 / 0.35); backdrop-filter: blur(2px); }
+  & h2 { margin: 0 0 16px; font-size: 18px; font-weight: 600; }
+  & label { display: grid; gap: 6px; margin-bottom: 14px; color: var(--muted); font-size: 13px; }
+  & .optional { font-size: 12px; opacity: 0.8; }
+  & .error { min-height: 1.5em; margin: -6px 0 8px; color: var(--danger); font-size: 13px; }
+  & .error:empty { visibility: hidden; }
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 8px;
+
+  & .spacer { flex: 1; }
+}

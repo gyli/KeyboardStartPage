@@ -1,0 +1,49 @@
+body {
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.wallpaper {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: center / cover no-repeat;
+}
+
+main {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.footer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 64px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Keep footer text readable on top of a photo. */
+.has-wallpaper .hint {
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+}
+
+.has-wallpaper #open-settings {
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+}
+
+#open-settings {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+}

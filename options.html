@@ -1,54 +1,136 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link rel="stylesheet" href="css/options.css">
-    <title>Keyboard Start Page - Options</title>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Keyboard Start Page Settings</title>
+  <script src="src/boot.js"></script>
+  <script src="src/prefix-shortcut.js"></script>
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/options.css">
+  <script type="module" src="src/options.js"></script>
 </head>
 <body>
-<header>
-    <h1>Keyboard Start Page</h1>
-</header>
-<article>
-    <h2>How to open a link</h2>
-    <section>
-        <label for="Click">Mouse left click: </label>
-        <select id="Click"></select>
-        <br />
-        <label for="MiddleClick">Mouse middle click: </label>
-        <select id="MiddleClick"></select>
-        <br />
-        <label for="CtrlClick">Ctrl + click: </label>
-        <select id="CtrlClick"></select>
-        <br />
-        <label for="ShiftClick">Shift + click: </label>
-        <select id="ShiftClick"></select>
-        <br />
-        <label for="CtrlShiftClick">Ctrl + Shift + click: </label>
-        <select id="CtrlShiftClick"></select>
-        <br />
-        <label for="ShiftMiddleClick">Shift + middle click: </label>
-        <select id="ShiftMiddleClick"></select>
-        <br />
-        <label for="Key">&lt;Key&gt;: </label>
-        <select id="Key"></select>
-        <br />
-        <label for="ShiftKey">Shift + &lt;Key&gt;: </label>
-        <select id="ShiftKey"></select>
-        <br />
-        <a href="#" id="shortcut-default">Reset to defaults</a>
+  <header class="page-header">
+    <img src="icons/icon-128.png" alt="" width="40" height="40">
+    <div>
+      <h1>Keyboard Start Page</h1>
+      <p>Changes are saved automatically, except in Your links.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Appearance</h2>
+      <div class="field">
+        <span class="field-label" id="theme-label">Theme</span>
+        <div class="segmented" role="radiogroup" aria-labelledby="theme-label">
+          <label><input type="radio" name="theme" value="system"> System</label>
+          <label><input type="radio" name="theme" value="light"> Light</label>
+          <label><input type="radio" name="theme" value="dark"> Dark</label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label" for="bg-color">Background</label>
+        <div class="inline">
+          <input id="bg-color" type="color">
+          <button id="bg-reset" class="button" type="button">Use theme color</button>
+        </div>
+      </div>
+      <div class="field">
+        <span>
+          <span class="field-label">Wallpaper</span>
+          <span class="description">An image behind the keyboard. Saved on this device only.</span>
+        </span>
+        <div class="inline">
+          <div id="wallpaper-preview" class="wallpaper-preview" hidden></div>
+          <button id="wallpaper-choose" class="button" type="button">Choose image</button>
+          <button id="wallpaper-remove" class="button" type="button">Remove</button>
+          <input id="wallpaper-file" type="file" accept="image/*" hidden>
+        </div>
+      </div>
+      <label class="field toggle">
+        <span>
+          <span class="field-label">Show hints</span>
+          <span class="description">Show a short help line under the keyboard.</span>
+        </span>
+        <input id="show-hints" type="checkbox" role="switch">
+      </label>
     </section>
-</article>
-<article>
-    <h2>Background</h2>
-    <section>
-        <label for="colorpicker" style="">Background color: </label>
-        <input id="colorpicker" type="color" />
-        <br />
-        <a href="#" id="bgcolor-default">Reset to defaults</a>
+
+    <section class="card">
+      <h2>Behavior</h2>
+      <label class="field toggle">
+        <span>
+          <span class="field-label">Focus the page on new tabs</span>
+          <span class="description">Chrome puts the cursor in the address bar on every new tab, so keys don’t work until you press Tab or click the page. Turn this on to focus the page instead. The address bar will then show the extension’s address.</span>
+        </span>
+        <input id="focus-page" type="checkbox" role="switch">
+      </label>
     </section>
-</article>
-<script src="js/jquery-2.1.3.min.js"></script>
-<script src="js/options.js"></script>
+
+    <section class="card">
+      <h2>Keyboard on the new tab page</h2>
+      <div id="shortcuts" class="shortcuts"></div>
+      <p class="description">Clicking a key works like any link: Ctrl/⌘ + click or middle click opens it in a new tab, and Shift + click opens a new window.</p>
+    </section>
+
+    <section class="card">
+      <h2>Your links</h2>
+      <p class="description">Edit, add or remove several links, then save them together.</p>
+      <div class="links-toolbar">
+        <label class="select-all"><input id="links-select-all" type="checkbox"> Select all</label>
+        <button id="links-remove-selected" class="button danger" type="button" disabled>Remove selected</button>
+      </div>
+      <ul id="links" class="links"></ul>
+      <div class="links-add">
+        <select id="add-key" aria-label="Key"></select>
+        <input id="add-name" type="text" placeholder="Name" aria-label="Name for the new link">
+        <input id="add-url" type="text" placeholder="example.com" aria-label="Address for the new link" spellcheck="false">
+        <button id="add-link" class="button" type="button">Add</button>
+      </div>
+      <div id="links-actions" class="links-actions" hidden>
+        <span id="links-changes"></span>
+        <span class="spacer"></span>
+        <button id="links-discard" class="button" type="button">Discard</button>
+        <button id="links-save" class="button primary" type="button">Save changes</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Open links from any page</h2>
+      <label class="field toggle">
+        <span>
+          <span class="field-label">Use a shortcut on websites</span>
+          <span id="prefix-example" class="description"></span>
+        </span>
+        <input id="page-shortcuts" type="checkbox" role="switch">
+      </label>
+      <div class="field stacked">
+        <span class="field-label">Shortcut prefix</span>
+        <div class="prefix-recorder">
+          <div id="prefix-keys" class="prefix-keys" aria-live="polite"></div>
+          <button id="prefix-record" class="button" type="button">Record</button>
+        </div>
+        <span id="prefix-note" class="description"></span>
+      </div>
+      <label class="field">
+        <span class="field-label">Open links</span>
+        <select id="prefix-open-mode" class="open-mode-select"></select>
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>Backup</h2>
+      <p class="description">Save your links and settings to a file, or restore them from one. Restoring replaces everything.</p>
+      <div class="inline">
+        <button id="export" class="button" type="button">Export</button>
+        <button id="import-button" class="button" type="button">Import</button>
+        <input id="import" type="file" accept="application/json,.json" hidden>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

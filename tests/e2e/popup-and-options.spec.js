@@ -55,6 +55,24 @@ test('a chosen wallpaper is saved at full quality and can be removed', async ({ 
   expect(await savedSize()).toBe(null);
 });
 
+test('choosing a new wallpaper replaces the old one in storage', async ({ seed, open }) => {
+  await seed({});
+  const page = await open('options.html');
+  const stored = () => page.evaluate(() => new Promise((resolve) => {
+    indexedDB.open('keyboard-start-page').onsuccess = (event) => {
+      const files = event.target.result.transaction('files').objectStore('files');
+      files.getAll().onsuccess = (all) => resolve(all.target.result.map((file) => file.size));
+    };
+  }));
+  const first = path.resolve(import.meta.dirname, '../../screenshot/screenshot-1.png');
+  const second = path.resolve(import.meta.dirname, '../../screenshot/screenshot-2.png');
+
+  await page.locator('#wallpaper-file').setInputFiles(first);
+  await expect(page.locator('#toast')).toHaveText('Wallpaper saved');
+  await page.locator('#wallpaper-file').setInputFiles(second);
+  await expect.poll(stored).toEqual([statSync(second).size]);
+});
+
 test('a file that is not an image is rejected as a wallpaper', async ({ seed, open }) => {
   await seed({});
   const page = await open('options.html');

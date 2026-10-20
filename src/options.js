@@ -90,6 +90,7 @@ function render(settings) {
     select.value = settings.shortcuts[select.dataset.trigger];
   }
   renderLinks(settings.links, settings.names);
+  renderLauncher(settings);
 }
 
 let wallpaperUrl;
@@ -112,13 +113,62 @@ async function chooseWallpaper(file) {
   await save(setWallpaper(file), 'Wallpaper saved');
 }
 
-// Chrome only lets users set extension shortcuts on its own shortcuts page.
-async function renderLauncherShortcut() {
+// --- Quick launcher ---
+// shortcutFromEvent() and formatShortcut() come from shortcut-keys.js.
+const ALL_SITES = { origins: ['<all_urls>'] };
+let recording = false;
+
+async function renderLauncher({ launcherShortcut }) {
+  const hasAccess = await chrome.permissions.contains(ALL_SITES);
+  const button = $('launcher-record');
+  if (!recording) {
+    button.textContent = launcherShortcut ? formatShortcut(launcherShortcut) : 'Set shortcut';
+    if (launcherShortcut && !hasAccess) button.textContent += ' (needs access)';
+  }
+  $('launcher-clear').hidden = !launcherShortcut;
+}
+
+function startRecording() {
+  recording = true;
+  $('launcher-record').textContent = 'Press keys…';
+  $('launcher-record').classList.add('recording');
+}
+
+async function stopRecording() {
+  recording = false;
+  $('launcher-record').classList.remove('recording');
+  await renderLauncher(await loadSettings());
+}
+
+async function handleRecordingKey(event) {
+  if (!recording) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (event.key === 'Escape') return stopRecording();
+  const shortcut = shortcutFromEvent(event);
+  if (!shortcut) {
+    if (!/^(Control|Alt|Shift|Meta)$/.test(event.key)) showToast('Include Ctrl, Alt or ⌘ in the shortcut.');
+    return;
+  }
+  // The key press counts as a user action, which Chrome requires for this request.
+  const granted = await chrome.permissions.request(ALL_SITES);
+  if (granted) await save(setPreference('launcherShortcut', shortcut), 'Shortcut saved. Reload open pages to use it there.');
+  else showToast('The shortcut needs access to websites to work.');
+  await stopRecording();
+}
+
+async function turnOffLauncher() {
+  await setPreference('launcherShortcut', null);
+  await chrome.permissions.remove(ALL_SITES);
+  showToast('Shortcut turned off');
+}
+
+// Chrome's own shortcut can only be changed on Chrome's shortcuts page.
+async function renderChromeShortcut() {
   const commands = await chrome.commands.getAll();
   const shortcut = commands.find((command) => command.name === '_execute_action')?.shortcut;
-  $('launcher-shortcut').textContent = shortcut
-    ? `Currently ${shortcut}. To turn it off, remove it on Chrome's shortcuts page.`
-    : 'Not set. Choose one on Chrome\'s shortcuts page to turn this on.';
+  $('launcher-chrome-shortcut').textContent = (shortcut ? `Currently ${shortcut}. ` : 'Not set. ')
+    + 'Also works on Chrome\'s own pages, where the shortcut above can\'t.';
 }
 
 let toastTimer;
@@ -156,14 +206,15 @@ async function restoreBackup(file) {
   }
 }
 
+// Event listeners are attached before anything is loaded, so early clicks aren't lost.
 buildShortcuts();
-render(await loadSettings());
-renderWallpaper(await loadWallpaper());
-renderLauncherShortcut();
 onSettingsChanged(render);
 onWallpaperChanged(renderWallpaper);
 // Pick up shortcut changes when the user comes back from Chrome's shortcuts page.
-window.addEventListener('focus', renderLauncherShortcut);
+window.addEventListener('focus', renderChromeShortcut);
+document.addEventListener('keydown', handleRecordingKey, true);
+// Leaving the button cancels recording.
+$('launcher-record').addEventListener('blur', () => recording && stopRecording());
 
 for (const radio of document.querySelectorAll('input[name="theme"]')) {
   radio.addEventListener('change', () => save(setPreference('theme', radio.value)));
@@ -172,6 +223,8 @@ $('bg-color').addEventListener('change', (event) => save(setPreference('bgColor'
 $('bg-reset').addEventListener('click', () => save(setPreference('bgColor', DEFAULT_PREFERENCES.bgColor)));
 $('show-hints').addEventListener('change', (event) => save(setPreference('showHints', event.target.checked)));
 $('focus-page').addEventListener('change', (event) => save(setPreference('focusPage', event.target.checked)));
+$('launcher-record').addEventListener('click', startRecording);
+$('launcher-clear').addEventListener('click', turnOffLauncher);
 $('launcher-change').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
 $('wallpaper-choose').addEventListener('click', () => $('wallpaper-file').click());
 $('wallpaper-file').addEventListener('change', (event) => {
@@ -187,3 +240,7 @@ $('import').addEventListener('change', (event) => {
   if (file) restoreBackup(file);
   event.target.value = '';
 });
+
+render(await loadSettings());
+renderWallpaper(await loadWallpaper());
+renderChromeShortcut();

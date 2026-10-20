@@ -28,7 +28,7 @@ test('settings show saved values and save changes', async ({ seed, open }) => {
   const page = await open('options.html');
 
   await expect(page.locator('select[data-trigger="ShiftKey"]')).toHaveValue('window');
-  await expect(page.locator('#launcher-shortcut')).toHaveText(/Not set/);
+  await expect(page.locator('#launcher-chrome-shortcut')).toHaveText(/Not set/);
   await expect(page.locator('#links li')).toHaveText(/Example/);
 
   await page.locator('select[data-trigger="Key"]').selectOption('active');
@@ -88,4 +88,49 @@ test('"Focus the page on new tabs" gives the page keyboard focus', async ({ cont
   const page = await swapped;
   await expect(key(page, 'q')).toBeVisible();
   expect(await page.evaluate(() => document.hasFocus())).toBe(true);
+});
+
+test('the launcher shortcut is recorded from a key press', async ({ seed, open }) => {
+  await seed({});
+  const page = await open('options.html');
+  // Stand in for Chrome's permission prompt, which tests can't click.
+  await page.evaluate(() => { chrome.permissions.request = async () => true; });
+
+  await page.getByRole('button', { name: 'Set shortcut' }).click();
+  await expect(page.locator('#launcher-record')).toHaveText('Press keys…');
+  await page.keyboard.press('k');
+  await expect(page.locator('#toast')).toHaveText(/Include Ctrl, Alt or ⌘/);
+  await page.keyboard.press('Alt+Shift+K');
+  await expect(page.locator('#toast')).toHaveText(/Shortcut saved/);
+  expect(await storage(page)).toMatchObject({ launcherShortcut: 'Alt+Shift+KeyK' });
+  await expect(page.locator('#launcher-clear')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Turn off' }).click();
+  await expect(page.locator('#toast')).toHaveText('Shortcut turned off');
+  expect(await storage(page)).not.toHaveProperty('launcherShortcut');
+});
+
+test.describe('with access to websites', () => {
+  test.use({ allSitesAccess: true });
+
+  test('the launcher shortcut opens the popup from a web page', async ({ context, serviceWorker, site, seed }) => {
+    await seed({ launcherShortcut: 'Alt+KeyK' });
+    await expect.poll(() => serviceWorker.evaluate(async () =>
+      (await chrome.scripting.getRegisteredContentScripts()).map((script) => script.id))).toEqual(['launcher']);
+    // Count popup requests instead of opening it: headless Chromium has no toolbar.
+    await serviceWorker.evaluate(() => {
+      self.popupRequests = 0;
+      chrome.action.openPopup = async () => { self.popupRequests++; };
+    });
+
+    const page = await context.newPage();
+    await page.goto(site);
+    await page.keyboard.press('Alt+J');
+    await page.keyboard.press('Alt+K');
+    await expect.poll(() => serviceWorker.evaluate(() => self.popupRequests)).toBe(1);
+
+    await seed({});
+    await expect.poll(() => serviceWorker.evaluate(async () =>
+      (await chrome.scripting.getRegisteredContentScripts()).length)).toBe(0);
+  });
 });

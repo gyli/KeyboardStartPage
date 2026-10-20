@@ -4,8 +4,9 @@
   "description": "__MSG_appDesc__",
   "default_locale": "en",
   "version": "1.0.0",
-  "minimum_chrome_version": "123",
-  "permissions": ["storage", "unlimitedStorage", "activeTab"],
+  "minimum_chrome_version": "127",
+  "permissions": ["storage", "unlimitedStorage", "activeTab", "scripting"],
+  "optional_host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "service-worker.js"
   },

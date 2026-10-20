@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Keyboard Start Page Settings</title>
   <script src="src/boot.js"></script>
+  <script src="src/shortcut-keys.js"></script>
   <link rel="stylesheet" href="styles/base.css">
   <link rel="stylesheet" href="styles/options.css">
   <script type="module" src="src/options.js"></script>
@@ -70,13 +71,23 @@
 
     <section class="card">
       <h2>Quick launcher</h2>
-      <p class="description">Open the keyboard on any page, then press a key to go. On an empty key, it offers to add the page you're on. You can also click the extension's icon in the toolbar.</p>
+      <p class="description">Open the keyboard over any page, then press a key to go. On an empty key, it offers to add the page you're on. You can also click the extension's icon in the toolbar.</p>
       <div class="field">
         <span>
           <span class="field-label">Shortcut</span>
-          <span id="launcher-shortcut" class="description"></span>
+          <span class="description">Works on websites. Chrome asks once for access to websites: the extension only listens for this shortcut and never reads or changes pages. Pages that are already open need a reload.</span>
         </span>
-        <button id="launcher-change" class="button" type="button">Change shortcut</button>
+        <div class="inline">
+          <button id="launcher-record" class="button shortcut-button" type="button">Set shortcut</button>
+          <button id="launcher-clear" class="button" type="button">Turn off</button>
+        </div>
+      </div>
+      <div class="field">
+        <span>
+          <span class="field-label">Chrome shortcut</span>
+          <span id="launcher-chrome-shortcut" class="description"></span>
+        </span>
+        <button id="launcher-change" class="button" type="button">Change in Chrome</button>
       </div>
     </section>
 

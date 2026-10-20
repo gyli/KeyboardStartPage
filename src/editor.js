@@ -17,8 +17,8 @@ const DIALOG_HTML = `
     <div class="dialog-actions">
       <button data-ref="remove" class="button danger" type="button">Remove</button>
       <span class="spacer"></span>
-      <button class="button" value="cancel" formnovalidate>Cancel</button>
-      <button class="button primary" value="save">Save</button>
+      <button data-ref="cancel" class="button" type="button">Cancel</button>
+      <button class="button primary">Save</button>
     </div>
   </form>`;
 
@@ -31,7 +31,6 @@ export function createEditor() {
   let currentKey;
 
   dialog.addEventListener('submit', (event) => {
-    if (event.submitter?.value !== 'save') return;
     const input = ref('url').value;
     const url = normalizeUrl(input);
     if (input.trim() && !url) {
@@ -42,6 +41,8 @@ export function createEditor() {
     setLink(currentKey, url, ref('name').value);
   });
 
+  // Cancel is a plain button so that Enter submits the form with Save.
+  ref('cancel').addEventListener('click', () => dialog.close());
   ref('remove').addEventListener('click', () => {
     setLink(currentKey, null);
     dialog.close();

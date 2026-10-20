@@ -21,7 +21,8 @@
   --gap: calc(var(--key-width) * 0.27);
 
   display: grid;
-  gap: calc(var(--gap) * 0.9);
+  /* Leaves room for name captions under the keys. */
+  gap: calc(var(--gap) + 10px);
 }
 
 .row {
@@ -84,19 +85,27 @@
 
 .key:hover .key-icon { opacity: 0.4; }
 
-/* The optional name sits on the bottom edge, right of the icon and below the letter. */
+/* The optional name is a caption under the key, like a label under an app icon.
+   It may use the gap on both sides, so longer names fit. */
 .key-name {
   position: absolute;
-  left: calc(var(--size) * 1.5 + 2px);
-  right: 4px;
-  bottom: calc(var(--size) / 4);
+  top: calc(100% + 6px);
+  left: 50%;
+  width: calc(100% + var(--gap) - 4px);
+  translate: -50% 0;
   overflow: hidden;
-  font-size: clamp(8px, calc(var(--key-height) * 0.2), 10px);
-  line-height: var(--size);
-  text-align: left;
+  color: var(--muted);
+  font: 500 clamp(9px, calc(var(--key-height) * 0.22), 11px) / 1.2 var(--font);
+  letter-spacing: 0.01em;
+  text-align: center;
   text-overflow: ellipsis;
-  text-shadow: none;
   white-space: nowrap;
+  pointer-events: none;
+}
+
+.has-wallpaper .key-name {
+  color: #fff;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
 }
 
 .key.drop-target .key-cap {

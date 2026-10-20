@@ -35,6 +35,7 @@ export const DEFAULT_PREFERENCES = {
   bgColor: null, // null means "use the theme's background"
   focusPage: false,
   showHints: true,
+  launcherShortcut: null, // e.g. "Alt+KeyK"; see src/shortcut-keys.js
 };
 
 const STARTER_LINKS = {
@@ -190,6 +191,7 @@ export async function importBackup(backup) {
   const preferences = backup.preferences ?? {};
   if (['system', 'light', 'dark'].includes(preferences.theme)) raw.theme = preferences.theme;
   if (/^#[\da-f]{6}$/i.test(preferences.bgColor)) raw.bgColor = preferences.bgColor;
+  if (/^((Ctrl|Alt|Shift|Meta)\+)+\w+$/.test(preferences.launcherShortcut)) raw.launcherShortcut = preferences.launcherShortcut;
   for (const name of ['focusPage', 'showHints']) {
     if (typeof preferences[name] === 'boolean') raw[name] = preferences[name];
   }

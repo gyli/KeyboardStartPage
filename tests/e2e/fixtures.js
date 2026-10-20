@@ -1,7 +1,8 @@
 // Loads the unpacked extension into Chromium for each test.
 import { test as base, chromium, expect } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import http from 'node:http';
+import os from 'node:os';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -10,7 +11,21 @@ const iconPng = readFileSync(path.join(root, 'icons/icon-32.png'));
 // An address that is never opened, for tests that only store links.
 export const SITE = 'https://site.example.test/';
 
+// A copy of the extension with access to all websites already granted. Playwright
+// can't click Chrome's permission prompt, so tests of the launcher script use this.
+function copyWithAllSitesAccess() {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'ksp-'));
+  const skip = ['node_modules', '.git', 'tests', 'test-results', 'dist'];
+  cpSync(root, dir, { recursive: true, filter: (src) => !skip.includes(path.basename(src)) });
+  const manifest = JSON.parse(readFileSync(path.join(dir, 'manifest.json'), 'utf8'));
+  manifest.host_permissions = manifest.optional_host_permissions;
+  writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(manifest));
+  return dir;
+}
+
 export const test = base.extend({
+  allSitesAccess: [false, { option: true }],
+
   // A real local web server for tests that open links. Playwright can't intercept
   // requests in tabs the extension opens in the background, so fake routes won't do.
   site: [async ({}, use) => {
@@ -23,10 +38,11 @@ export const test = base.extend({
     server.close();
   }, { scope: 'worker' }],
 
-  context: async ({}, use) => {
+  context: async ({ allSitesAccess }, use) => {
+    const extension = allSitesAccess ? copyWithAllSitesAccess() : root;
     const context = await chromium.launchPersistentContext('', {
       channel: 'chromium',
-      args: [`--disable-extensions-except=${root}`, `--load-extension=${root}`],
+      args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`],
     });
     // Fake favicons, so tests never touch the network.
     await context.route(/^https:\/\/www\.google\.com\/s2\/favicons/, (route) =>

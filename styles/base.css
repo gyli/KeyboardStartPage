@@ -60,6 +60,7 @@ kbd {
   background: var(--surface);
   color: var(--text);
   font: 500 14px var(--font);
+  white-space: nowrap;
   cursor: pointer;
 
   &:hover { background: var(--surface-hover); }

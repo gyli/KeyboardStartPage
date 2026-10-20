@@ -39,6 +39,16 @@ test('adds, names and removes a link with the editor', async ({ seed, open }) =>
   expect(await storage(page)).not.toHaveProperty('li_q');
 });
 
+test('pressing Enter in the editor saves the link', async ({ seed, open }) => {
+  await seed({});
+  const page = await open('newtab.html');
+  await key(page, 'q').locator('.key-cap').click();
+  await page.locator('dialog').getByLabel('Website address').fill('site.example.test');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('dialog')).toBeHidden();
+  expect(await storage(page)).toMatchObject({ li_q: SITE });
+});
+
 test('pressing a key opens its link, and Shift opens it in the background', async ({ context, site, seed, open }) => {
   await seed({ li_e: site });
   const page = await open('newtab.html');

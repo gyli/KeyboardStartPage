@@ -84,11 +84,3 @@ test('backups round-trip and reject bad values', async () => {
 
   await assert.rejects(storage.importBackup({ hello: 'world' }), /not a Keyboard Start Page backup/);
 });
-
-test('the wallpaper lives in local storage', async () => {
-  await storage.setWallpaper('data:image/jpeg;base64,AAAA');
-  assert.equal(await storage.loadWallpaper(), 'data:image/jpeg;base64,AAAA');
-  assert.equal('wallpaper' in areas.sync, false);
-  await storage.setWallpaper(null);
-  assert.equal(await storage.loadWallpaper(), null);
-});

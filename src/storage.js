@@ -1,5 +1,5 @@
-// Settings live in chrome.storage.sync. The wallpaper is too large for sync,
-// so it lives in chrome.storage.local and stays on this device.
+// Settings live in chrome.storage.sync. The wallpaper is too large for that,
+// so the original image file is kept in IndexedDB on this device.
 // Key names (li_<key>, ShiftKey, bgColor, ...) are the same as in v0.4,
 // so existing users keep their links and preferences after updating.
 
@@ -125,19 +125,35 @@ export function setPreference(name, value) {
   return value === null ? store.remove(name) : store.set({ [name]: value });
 }
 
-export async function loadWallpaper() {
-  const { wallpaper } = await chrome.storage.local.get('wallpaper');
-  return wallpaper ?? null;
+// Runs one request against the "files" store in IndexedDB.
+function filesRequest(mode, makeRequest) {
+  return new Promise((resolve, reject) => {
+    const open = indexedDB.open('keyboard-start-page', 1);
+    open.onupgradeneeded = () => open.result.createObjectStore('files');
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const request = makeRequest(open.result.transaction('files', mode).objectStore('files'));
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    };
+  });
 }
 
-// dataUrl is an image data URL, or null to remove the wallpaper.
-export function setWallpaper(dataUrl) {
-  return dataUrl ? chrome.storage.local.set({ wallpaper: dataUrl }) : chrome.storage.local.remove('wallpaper');
+// Returns the wallpaper image as a Blob, or null.
+export async function loadWallpaper() {
+  return (await filesRequest('readonly', (files) => files.get('wallpaper'))) ?? null;
+}
+
+// Saves the image file as is, without resizing, or removes it when image is null.
+export async function setWallpaper(image) {
+  await filesRequest('readwrite', (files) => (image ? files.put(image, 'wallpaper') : files.delete('wallpaper')));
+  // IndexedDB has no change events, so tell other open pages through storage.
+  await chrome.storage.local.set({ wallpaperChanged: Date.now() });
 }
 
 export function onWallpaperChanged(callback) {
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes.wallpaper) callback(changes.wallpaper.newValue ?? null);
+  chrome.storage.onChanged.addListener(async (changes, area) => {
+    if (area === 'local' && changes.wallpaperChanged) callback(await loadWallpaper());
   });
 }
 

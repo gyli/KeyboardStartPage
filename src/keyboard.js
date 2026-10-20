@@ -4,7 +4,7 @@ import { faviconUrl, isWebUrl, normalizeUrl, siteName } from './url.js';
 import { modeForClick, openLink } from './open.js';
 
 const KEY_HTML = `
-  <a class="key-cap"><span class="key-label"></span><img class="key-icon" alt="" hidden></a>
+  <a class="key-cap"><span class="key-label"></span><img class="key-icon" alt="" hidden><span class="key-name"></span></a>
   <button class="key-edit" type="button" tabindex="-1" aria-label="Edit link">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>
   </button>`;
@@ -99,6 +99,7 @@ export function createKeyboard(container, { onEdit, onOpen, onDropUrl }) {
       const iconSrc = url ? faviconUrl(url) : null;
 
       element.classList.toggle('bound', Boolean(url));
+      element.querySelector('.key-name').textContent = (url && settings.names[key]) || '';
       if (url) {
         cap.href = url;
         cap.title = settings.names[key] ? `${name}\n${url}` : url;

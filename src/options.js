@@ -8,7 +8,6 @@ import { applyTheme } from './theme.js';
 
 const $ = (id) => document.getElementById(id);
 const toast = $('toast');
-const MAX_WALLPAPER_SIZE = 2560;
 
 // The color picker needs a hex value, so read the theme background back from the page.
 function themeBackgroundHex() {
@@ -93,35 +92,24 @@ function render(settings) {
   renderLinks(settings.links, settings.names);
 }
 
-function renderWallpaper(dataUrl) {
-  $('wallpaper-preview').hidden = !dataUrl;
-  $('wallpaper-preview').style.backgroundImage = dataUrl ? `url("${dataUrl}")` : '';
-  $('wallpaper-remove').disabled = !dataUrl;
-}
-
-// Scales the image down and re-encodes it as JPEG, so even large photos stay
-// well under chrome.storage.local's 10 MB limit.
-async function compressImage(file) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX_WALLPAPER_SIZE / Math.max(bitmap.width, bitmap.height));
-  const canvas = new OffscreenCanvas(Math.round(bitmap.width * scale), Math.round(bitmap.height * scale));
-  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.85 });
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(blob);
-  });
+let wallpaperUrl;
+function renderWallpaper(image) {
+  if (wallpaperUrl) URL.revokeObjectURL(wallpaperUrl);
+  wallpaperUrl = image ? URL.createObjectURL(image) : null;
+  $('wallpaper-preview').hidden = !image;
+  $('wallpaper-preview').style.backgroundImage = wallpaperUrl ? `url("${wallpaperUrl}")` : '';
+  $('wallpaper-remove').disabled = !image;
 }
 
 async function chooseWallpaper(file) {
   try {
-    await setWallpaper(await compressImage(file));
-    showToast('Wallpaper saved');
+    // Decoding the image first rejects files Chrome can't display.
+    (await createImageBitmap(file)).close();
   } catch {
-    showToast('Couldn’t use this image. Try a JPEG or PNG file.');
+    showToast('Couldn’t use this image. Try a JPEG, PNG or WebP file.');
+    return;
   }
+  await save(setWallpaper(file), 'Wallpaper saved');
 }
 
 // Chrome only lets users set extension shortcuts on its own shortcuts page.

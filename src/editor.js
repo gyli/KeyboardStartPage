@@ -10,7 +10,7 @@ const DIALOG_HTML = `
       <input data-ref="url" type="text" inputmode="url" placeholder="example.com" autocomplete="off" spellcheck="false">
     </label>
     <label>
-      Name <span class="optional">(optional, shown when you hover the key)</span>
+      Name <span class="optional">(optional, shown on the key, short names fit best)</span>
       <input data-ref="name" type="text" maxlength="${MAX_NAME_LENGTH}" autocomplete="off">
     </label>
     <p data-ref="error" class="error" role="alert"></p>

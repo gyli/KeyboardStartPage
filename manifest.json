@@ -5,7 +5,7 @@
   "default_locale": "en",
   "version": "1.0.0",
   "minimum_chrome_version": "123",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "unlimitedStorage", "activeTab"],
   "background": {
     "service_worker": "service-worker.js"
   },
@@ -13,12 +13,12 @@
     "newtab": "newtab.html"
   },
   "action": {
-    "default_title": "Keyboard Start Page",
+    "default_title": "__MSG_appName__",
     "default_popup": "popup.html"
   },
   "commands": {
     "_execute_action": {
-      "description": "Open the keyboard"
+      "description": "__MSG_commandDesc__"
     }
   },
   "options_ui": {

@@ -27,6 +27,8 @@ test('adds, names and removes a link with the editor', async ({ seed, open }) =>
   await expect(dialog).toBeHidden();
   await expect(key(page, 'q')).toHaveClass(/bound/);
   await expect(key(page, 'q').locator('.key-cap')).toHaveAttribute('title', `My site\n${SITE}`);
+  await expect(key(page, 'q').locator('.key-name')).toHaveText('My site');
+  await expect(key(page, 'q').locator('.key-label')).toHaveText('Q');
   expect(await storage(page)).toMatchObject({ li_q: SITE, name_q: 'My site' });
 
   await key(page, 'q').hover();
@@ -105,9 +107,13 @@ test('dropping a link on a key adds it, or asks before replacing one', async ({ 
 test('the wallpaper shows behind the keyboard', async ({ seed, open }) => {
   await seed({});
   const page = await open('newtab.html');
-  await page.evaluate(() => chrome.storage.local.set({ wallpaper: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=' }));
+  await page.evaluate(async () => {
+    const { setWallpaper } = await import('/src/storage.js');
+    const image = await (await fetch('/icons/icon-128.png')).blob();
+    await setWallpaper(image);
+  });
   await expect(page.locator('body')).toHaveClass(/has-wallpaper/);
-  await expect(page.locator('#wallpaper')).toHaveCSS('background-image', /data:image\/gif/);
+  await expect(page.locator('#wallpaper')).toHaveCSS('background-image', /blob:/);
 });
 
 test('site icons are cached by the service worker', async ({ seed, open }) => {

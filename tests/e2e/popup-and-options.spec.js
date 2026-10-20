@@ -1,3 +1,4 @@
+import { statSync } from 'node:fs';
 import path from 'node:path';
 import { SITE, expect, key, storage, test } from './fixtures.js';
 
@@ -8,7 +9,8 @@ test('the popup opens a link over the current page', async ({ context, site, see
   const page = await open('popup.html');
   await expect(key(page, 'e')).toHaveClass(/bound/);
   const request = context.waitForEvent('request', (r) => r.url() === site);
-  await page.keyboard.press('e');
+  // The popup closes itself on keydown, so don't wait for the key to be released.
+  await page.keyboard.down('e');
   await request;
 });
 
@@ -34,18 +36,30 @@ test('settings show saved values and save changes', async ({ seed, open }) => {
   expect(await storage(page)).toMatchObject({ Key: 'active', showHints: false });
 });
 
-test('a chosen wallpaper is resized, saved locally and can be removed', async ({ seed, open }) => {
+test('a chosen wallpaper is saved at full quality and can be removed', async ({ seed, open }) => {
   await seed({});
   const page = await open('options.html');
+  const file = path.resolve(import.meta.dirname, '../../screenshot/screenshot-1.png');
+  const savedSize = () => page.evaluate(async () => {
+    const { loadWallpaper } = await import('/src/storage.js');
+    return (await loadWallpaper())?.size ?? null;
+  });
 
-  await page.locator('#wallpaper-file').setInputFiles(path.resolve(import.meta.dirname, '../../screenshot/screenshot-1.png'));
+  await page.locator('#wallpaper-file').setInputFiles(file);
   await expect(page.locator('#toast')).toHaveText('Wallpaper saved');
-  const { wallpaper } = await storage(page, 'local');
-  expect(wallpaper).toMatch(/^data:image\/jpeg;base64,/);
+  expect(await savedSize()).toBe(statSync(file).size);
   await expect(page.locator('#wallpaper-preview')).toBeVisible();
 
   await page.getByRole('button', { name: 'Remove' }).click();
-  expect(await storage(page, 'local')).not.toHaveProperty('wallpaper');
+  await expect(page.locator('#toast')).toHaveText('Wallpaper removed');
+  expect(await savedSize()).toBe(null);
+});
+
+test('a file that is not an image is rejected as a wallpaper', async ({ seed, open }) => {
+  await seed({});
+  const page = await open('options.html');
+  await page.locator('#wallpaper-file').setInputFiles({ name: 'notes.png', mimeType: 'image/png', buffer: Buffer.from('not an image') });
+  await expect(page.locator('#toast')).toHaveText(/Couldn’t use this image/);
 });
 
 test('"Focus the page on new tabs" gives the page keyboard focus', async ({ context, seed, open }) => {

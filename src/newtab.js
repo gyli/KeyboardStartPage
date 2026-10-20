@@ -27,10 +27,12 @@ function render() {
   keyboard.render(settings);
 }
 
-function renderWallpaper(dataUrl) {
-  const layer = document.getElementById('wallpaper');
-  layer.style.backgroundImage = dataUrl ? `url("${dataUrl}")` : '';
-  document.body.classList.toggle('has-wallpaper', Boolean(dataUrl));
+let wallpaperUrl;
+function renderWallpaper(image) {
+  if (wallpaperUrl) URL.revokeObjectURL(wallpaperUrl);
+  wallpaperUrl = image ? URL.createObjectURL(image) : null;
+  document.getElementById('wallpaper').style.backgroundImage = wallpaperUrl ? `url("${wallpaperUrl}")` : '';
+  document.body.classList.toggle('has-wallpaper', Boolean(image));
 }
 
 function editKey(key, url) {

@@ -37,6 +37,8 @@
 }
 
 .key-cap {
+  --size: clamp(11px, calc(var(--key-height) * 0.3), 16px); /* icon size */
+
   position: absolute;
   inset: 0;
   display: grid;
@@ -70,8 +72,6 @@
 }
 
 .key-icon {
-  --size: clamp(11px, calc(var(--key-height) * 0.3), 16px);
-
   position: absolute;
   left: calc(var(--size) / 4);
   bottom: calc(var(--size) / 4);
@@ -83,6 +83,21 @@
 }
 
 .key:hover .key-icon { opacity: 0.4; }
+
+/* The optional name sits on the bottom edge, right of the icon and below the letter. */
+.key-name {
+  position: absolute;
+  left: calc(var(--size) * 1.5 + 2px);
+  right: 4px;
+  bottom: calc(var(--size) / 4);
+  overflow: hidden;
+  font-size: clamp(8px, calc(var(--key-height) * 0.2), 10px);
+  line-height: var(--size);
+  text-align: left;
+  text-overflow: ellipsis;
+  text-shadow: none;
+  white-space: nowrap;
+}
 
 .key.drop-target .key-cap {
   outline: 2px solid var(--accent);

@@ -57,7 +57,8 @@ kbd {
 }
 
 .button {
-  padding: 8px 14px;
+  height: 36px;
+  padding: 0 14px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
@@ -99,8 +100,6 @@ select {
   &:hover { background-color: var(--surface-hover); }
   &:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
 }
-
-.button { height: 36px; }
 
 .icon-button {
   display: grid;

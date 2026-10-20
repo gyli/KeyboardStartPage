@@ -10,7 +10,7 @@ const KEY_HTML = `
   </button>`;
 
 // Builds the keyboard inside container.
-//   onEdit(key, url?)     open the editor, optionally with a URL to prefill
+//   onEdit(key)           open the editor for a key
 //   onOpen(key, event)    called when a key with a link is clicked. Optional: without
 //                         it, Chrome follows the link itself, except for non-web URLs.
 //   onDropUrl(key, url)   called when a link is dropped on a key

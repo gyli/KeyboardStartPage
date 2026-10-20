@@ -2,7 +2,7 @@
 // Colors themselves are defined in styles/base.css.
 // The values are also cached in localStorage so src/boot.js can apply them
 // before the first paint, without waiting for chrome.storage.
-export const THEME_CACHE = 'theme-cache';
+const THEME_CACHE = 'theme-cache'; // also read by src/boot.js
 
 export function applyTheme({ theme, bgColor }) {
   const root = document.documentElement;

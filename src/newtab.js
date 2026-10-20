@@ -62,7 +62,7 @@ function openKey(key, mode) {
 }
 
 function handleKeydown(event) {
-  if (editor.isOpen || event.repeat) return;
+  if (editor.isOpen) return;
   const key = keyFromEvent(event);
   if (!key) return;
   event.preventDefault();

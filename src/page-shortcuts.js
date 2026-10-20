@@ -10,6 +10,7 @@ if (!globalThis.keyboardStartPageShortcuts) {
   let boundKeys = new Set();
 
   const update = (items) => {
+    // 'Alt' is the default prefix, as in DEFAULT_PREFERENCES (content scripts can't import storage.js).
     prefix = items.pageShortcuts ? items.shortcutPrefix ?? 'Alt' : null;
     boundKeys = new Set(Object.keys(items).filter((name) => name.startsWith('li_')).map((name) => name.slice(3)));
   };

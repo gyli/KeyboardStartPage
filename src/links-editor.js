@@ -197,7 +197,7 @@ export function createLinksEditor({ showToast }) {
       draft = new Map();
       showToast(`Saved ${count} ${count === 1 ? 'change' : 'changes'}`);
     } catch (error) {
-      showToast(`Couldn't save: ${error.message}`);
+      showToast(`Couldn’t save: ${error.message}`);
     }
   }
 
@@ -216,6 +216,7 @@ export function createLinksEditor({ showToast }) {
     selected.clear();
     render();
   });
+  $('add-name').maxLength = MAX_NAME_LENGTH;
   $('add-link').addEventListener('click', addLink);
   for (const id of ['add-url', 'add-name']) {
     $(id).addEventListener('keydown', (event) => event.key === 'Enter' && addLink());

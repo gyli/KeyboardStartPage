@@ -1,5 +1,5 @@
 // The toolbar popup: the same keyboard, opened from any page with the
-// extension's shortcut or toolbar button. Links open over the current page.
+// extension's toolbar button. Links open over the current page.
 import { loadSettings } from './storage.js';
 import { createKeyboard, keyFromEvent } from './keyboard.js';
 import { createEditor } from './editor.js';

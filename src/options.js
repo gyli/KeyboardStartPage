@@ -105,7 +105,7 @@ function renderPrefix({ pageShortcuts, shortcutPrefix, prefixOpenMode, links }) 
     `On any website, hold ${prefixShortcut.format(currentPrefix, IS_MAC)} and press ${exampleKey} to open the link on ${exampleKey}.`;
 
   $('prefix-note').textContent = keys.length
-    ? `Holding several letters together doesn't work on every keyboard. While the prefix is held, ${keys.map(prefixShortcut.keyLabel).join(' and ')} won't type on websites.`
+    ? `Holding several letters together doesn’t work on every keyboard. While the prefix is held, ${keys.map(prefixShortcut.keyLabel).join(' and ')} won’t type on websites.`
     : 'Click Record, hold the keys you want together, then let go.';
 }
 
@@ -199,7 +199,7 @@ async function save(promise, message = 'Saved') {
     await promise;
     showToast(message);
   } catch (error) {
-    showToast(`Couldn't save: ${error.message}`);
+    showToast(`Couldn’t save: ${error.message}`);
   }
 }
 

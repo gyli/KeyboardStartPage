@@ -117,5 +117,5 @@ globalThis.prefixShortcut ??= (() => {
     });
   }
 
-  return { MODIFIERS, MAX_KEYS, parse, serialize, format, labels, keyLabel, modifierLabel, modifierFromCode, listen };
+  return { MODIFIERS, MAX_KEYS, parse, serialize, format, keyLabel, modifierLabel, modifierFromCode, listen };
 })();

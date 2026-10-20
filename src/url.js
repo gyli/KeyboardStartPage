@@ -18,7 +18,7 @@ export function normalizeUrl(input) {
   return url.href;
 }
 
-// Short name shown on a key, e.g. "youtube.com".
+// Short site name for labels and messages, e.g. "youtube.com".
 export function siteName(href) {
   try {
     const url = new URL(href);

@@ -167,7 +167,7 @@ test('the prefix is recorded by holding keys together', async ({ seed, open }) =
   await expect.poll(prefix).toBe('Ctrl+KeyX+KeyP');
   await expect(keycaps).toHaveText([/Ctrl|⌃/, 'X', 'P']);
   await expect(page.locator('#prefix-example')).toHaveText(/hold .* and press G to open the link on G/);
-  await expect(page.locator('#prefix-note')).toHaveText(/X and P won't type/);
+  await expect(page.locator('#prefix-note')).toHaveText(/X and P won’t type/);
 });
 
 test('where prefix shortcut links open is saved', async ({ seed, open }) => {

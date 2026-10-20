@@ -87,4 +87,5 @@ test('backups round-trip and reject bad values', async () => {
   assert.deepEqual(areas.sync, { default: 'passed', li_b: 'https://example.org/' });
 
   await assert.rejects(storage.importBackup({ hello: 'world' }), /not a Keyboard Start Page backup/);
+  await assert.rejects(storage.importBackup({ app: 'keyboard-start-page', links: null }), /not a Keyboard Start Page backup/);
 });

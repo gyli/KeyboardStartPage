@@ -197,7 +197,7 @@ export async function exportBackup() {
 
 // Replaces everything with the backup's contents. Throws if the file is not a backup.
 export async function importBackup(backup) {
-  if (backup?.app !== 'keyboard-start-page' || typeof backup.links !== 'object') {
+  if (backup?.app !== 'keyboard-start-page' || !backup.links || typeof backup.links !== 'object') {
     throw new Error('This file is not a Keyboard Start Page backup.');
   }
   const raw = { default: 'passed' };

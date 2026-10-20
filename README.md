@@ -27,7 +27,7 @@ Chrome puts the cursor in the address bar on every new tab. Press <kbd>Tab</kbd>
 
 ## Development
 
-There is no build step and there are no dependencies.
+There is no build step, and the extension has no dependencies. Playwright is used only for tests.
 
 1. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and pick this folder.
 2. After editing files, click the reload icon on the extension card and open a new tab.
@@ -54,7 +54,7 @@ Run `npm install` once, then `npm test`. Unit tests (`tests/unit`) use Node's bu
 | `service-worker.js` | Turns prefix shortcuts on and off, opens their links, caches site icons |
 | `styles/base.css` | Colors and shared controls for light and dark mode |
 
-Settings are stored in `chrome.storage.sync` with the same key names as v0.4 (`li_<key>`, `Click`, `bgColor`, ...), so updating keeps existing users' links.
+Settings are stored in `chrome.storage.sync` with the same key names as v0.4 (`li_<key>`, `ShiftKey`, `bgColor`, ...), so updating keeps existing users’ links.
 
 ## Thanks
 

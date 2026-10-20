@@ -130,16 +130,7 @@ export function createKeyboard(container, { onEdit, onOpen, onDropUrl }) {
   return { render, flash };
 }
 
-// "Ctrl+Alt+Shift+Meta" order, matching SHORTCUT_PREFIXES in storage.js.
-// Keep in sync with src/page-shortcuts.js.
-export function modifiersOf(event) {
-  return [event.ctrlKey && 'Ctrl', event.altKey && 'Alt', event.shiftKey && 'Shift', event.metaKey && 'Meta']
-    .filter(Boolean).join('+');
-}
-
-// The key for a prefix shortcut. Uses the physical key, because Alt/Option
-// changes the typed character on a Mac.
-export function keyFromCode(code) {
+function keyFromCode(code) {
   const match = /^(?:Key([A-Z])|Digit(\d))$/.exec(code);
   return match ? (match[1] ?? match[2]).toLowerCase() : null;
 }

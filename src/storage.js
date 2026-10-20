@@ -35,12 +35,9 @@ export const DEFAULT_PREFERENCES = {
   bgColor: null, // null means "use the theme's background"
   focusPage: false,
   showHints: true,
-  shortcutPrefix: null, // one of SHORTCUT_PREFIXES: prefix + key opens a link from any page
+  pageShortcuts: false, // "Open links from any page" is on
+  shortcutPrefix: 'Alt', // see src/prefix-shortcut.js for the format
 };
-
-// Modifier combinations offered as the prefix for opening links from any page.
-// Written in the order modifiersOf() in keyboard.js produces.
-export const SHORTCUT_PREFIXES = ['Alt', 'Alt+Shift', 'Ctrl+Shift', 'Ctrl+Alt'];
 
 const STARTER_LINKS = {
   g: 'https://www.google.com/',
@@ -195,8 +192,9 @@ export async function importBackup(backup) {
   const preferences = backup.preferences ?? {};
   if (['system', 'light', 'dark'].includes(preferences.theme)) raw.theme = preferences.theme;
   if (/^#[\da-f]{6}$/i.test(preferences.bgColor)) raw.bgColor = preferences.bgColor;
-  if (SHORTCUT_PREFIXES.includes(preferences.shortcutPrefix)) raw.shortcutPrefix = preferences.shortcutPrefix;
-  for (const name of ['focusPage', 'showHints']) {
+  // Same rule as parse() in prefix-shortcut.js: key codes joined by "+", with Ctrl, Alt or Meta.
+  if (/^(?=.*\b(Ctrl|Alt|Meta)\b)[A-Za-z0-9+]+$/.test(preferences.shortcutPrefix)) raw.shortcutPrefix = preferences.shortcutPrefix;
+  for (const name of ['focusPage', 'showHints', 'pageShortcuts']) {
     if (typeof preferences[name] === 'boolean') raw[name] = preferences[name];
   }
   await store.clear();

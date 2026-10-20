@@ -10,6 +10,6 @@ Keyboard Start Page does not collect, track, or sell any data.
 
 **Permissions.** `storage` saves your links and settings. `unlimitedStorage` keeps a large wallpaper image from being removed when your disk is nearly full. `activeTab` lets the toolbar popup read the address of the page you're on, only when you open the popup, so it can offer to add that page to a key. `scripting` runs the shortcut prefix on web pages.
 
-**Access to websites (optional).** Only if you turn on a shortcut prefix, Chrome asks you to allow access to websites. The extension then adds a small script to web pages that only listens for the prefix shortcuts. It does not read, collect or change anything on the page. Turning the prefix off removes the script and the access.
+**Access to websites (optional).** Only if you turn on shortcuts on websites, Chrome asks you to allow access to websites. The extension then adds a small script to web pages that only listens for the prefix shortcuts. It does not read, collect or change anything on the page. Turning it off removes the script and the access.
 
 Questions: open an issue at https://github.com/gyli/KeyboardStartPage/issues.

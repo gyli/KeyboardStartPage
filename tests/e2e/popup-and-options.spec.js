@@ -49,7 +49,7 @@ test('a chosen wallpaper is saved at full quality and can be removed', async ({ 
   expect(await savedSize()).toBe(statSync(file).size);
   await expect(page.locator('#wallpaper-preview')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Remove' }).click();
+  await page.getByRole('button', { name: 'Remove', exact: true }).click();
   await expect(page.locator('#toast')).toHaveText('Wallpaper removed');
   expect(await savedSize()).toBe(null);
 });
@@ -89,7 +89,7 @@ test('"Focus the page on new tabs" gives the page keyboard focus', async ({ cont
   expect(await page.evaluate(() => document.hasFocus())).toBe(true);
 });
 
-test('choosing a shortcut prefix asks for website access, and Off removes it', async ({ seed, open }) => {
+test('turning on shortcuts asks for website access, and turning off removes it', async ({ seed, open }) => {
   await seed({ li_g: SITE });
   const page = await open('options.html');
   // Stand in for Chrome's permission prompt, which tests can't click.
@@ -98,17 +98,15 @@ test('choosing a shortcut prefix asks for website access, and Off removes it', a
     chrome.permissions.request = async (p) => { permissionCalls.push(['request', p.origins]); return true; };
     chrome.permissions.remove = async (p) => { permissionCalls.push(['remove', p.origins]); return true; };
   });
-  const select = page.locator('#shortcut-prefix');
-  await expect(select).toHaveValue('');
+  const toggle = page.getByRole('switch', { name: /Use a shortcut on websites/ });
 
-  await select.selectOption('Alt+Shift');
-  await expect(page.locator('#toast')).toHaveText(/Saved/);
-  expect(await storage(page)).toMatchObject({ shortcutPrefix: 'Alt+Shift' });
-  await expect(page.locator('#prefix-example')).toHaveText(/\+ G on any website/);
+  await toggle.check();
+  await expect(page.locator('#toast')).toHaveText(/Turned on/);
+  expect(await storage(page)).toMatchObject({ pageShortcuts: true });
 
-  await select.selectOption('');
-  await expect(page.locator('#toast')).toHaveText('Shortcuts turned off');
-  expect(await storage(page)).not.toHaveProperty('shortcutPrefix');
+  await toggle.uncheck();
+  await expect(page.locator('#toast')).toHaveText('Turned off');
+  expect(await storage(page)).toMatchObject({ pageShortcuts: false });
   expect(await page.evaluate(() => permissionCalls)).toEqual([['request', ['<all_urls>']], ['remove', ['<all_urls>']]]);
 });
 
@@ -116,10 +114,44 @@ test('declining website access keeps shortcuts off', async ({ seed, open }) => {
   await seed({});
   const page = await open('options.html');
   await page.evaluate(() => { chrome.permissions.request = async () => false; });
-  await page.locator('#shortcut-prefix').selectOption('Alt');
-  await expect(page.locator('#toast')).toHaveText(/need access to websites/);
-  await expect(page.locator('#shortcut-prefix')).toHaveValue('');
-  expect(await storage(page)).not.toHaveProperty('shortcutPrefix');
+  const toggle = page.getByRole('switch', { name: /Use a shortcut on websites/ });
+  // The switch flips back off once access is declined, so click instead of check().
+  await toggle.click();
+  await expect(page.locator('#toast')).toHaveText(/needs access to websites/);
+  await expect(toggle).not.toBeChecked();
+  expect(await storage(page)).not.toHaveProperty('pageShortcuts');
+});
+
+test('the prefix is built from modifier chips and an optional key', async ({ seed, open }) => {
+  await seed({ li_g: SITE });
+  const page = await open('options.html');
+  const chip = (modifier) => page.locator(`#prefix-modifiers [data-modifier="${modifier}"]`);
+  const prefix = async () => (await storage(page)).shortcutPrefix;
+
+  // Default is Alt.
+  await expect(chip('Alt')).toHaveAttribute('aria-pressed', 'true');
+  await chip('Ctrl').click();
+  await expect.poll(prefix).toBe('Ctrl+Alt');
+  await chip('Alt').click();
+  await expect.poll(prefix).toBe('Ctrl');
+
+  // Removing the last of Ctrl/Alt/Meta isn't allowed.
+  await chip('Ctrl').click();
+  await expect(page.locator('#toast')).toHaveText(/The prefix needs/);
+  await expect.poll(prefix).toBe('Ctrl');
+
+  await chip('Meta').click();
+  await page.locator('#prefix-key').click();
+  await expect(page.locator('#prefix-key')).toHaveText('Press a key…');
+  await page.keyboard.press('Shift'); // modifiers alone are ignored
+  await page.keyboard.press('p');
+  await expect.poll(prefix).toBe('Ctrl+Meta+KeyP');
+  await expect(page.locator('#prefix-key')).toHaveText('P');
+  await expect(page.locator('#prefix-example')).toHaveText(/, then G to open the link on G/);
+
+  await page.locator('#prefix-key-clear').click();
+  await expect.poll(prefix).toBe('Ctrl+Meta');
+  await expect(page.locator('#prefix-key')).toHaveText('Add key');
 });
 
 test.describe('with access to websites', () => {
@@ -133,7 +165,7 @@ test.describe('with access to websites', () => {
     const page = await context.newPage();
     await page.goto(`${site}start`);
 
-    await seed({ li_e: `${site}target`, shortcutPrefix: 'Alt' });
+    await seed({ li_e: `${site}target`, pageShortcuts: true, shortcutPrefix: 'Alt' });
     await expect.poll(() => registeredScripts(serviceWorker)).toEqual(['page-shortcuts']);
 
     // Q has no link, so the page keeps the key press.
@@ -148,5 +180,18 @@ test.describe('with access to websites', () => {
 
     await seed({});
     await expect.poll(() => registeredScripts(serviceWorker)).toEqual([]);
+  });
+
+  test('a two-step prefix opens the link from a web page', async ({ context, serviceWorker, site, seed }) => {
+    await seed({ li_e: `${site}target`, pageShortcuts: true, shortcutPrefix: 'Ctrl+Shift+KeyP' });
+    await expect.poll(() => registeredScripts(serviceWorker)).toEqual(['page-shortcuts']);
+    const page = await context.newPage();
+    await page.goto(`${site}start`);
+
+    await expect(async () => {
+      await page.keyboard.press('Control+Shift+P');
+      await page.keyboard.press('e');
+      await expect(page).toHaveURL(`${site}target`, { timeout: 1000 });
+    }).toPass();
   });
 });

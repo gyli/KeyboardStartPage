@@ -1,5 +1,5 @@
 import { loadSettings, loadWallpaper, onSettingsChanged, onWallpaperChanged, setLink } from './storage.js';
-import { createKeyboard, keyFromCode, keyFromEvent, modifiersOf } from './keyboard.js';
+import { createKeyboard, keyFromEvent } from './keyboard.js';
 import { createEditor } from './editor.js';
 import { openLink } from './open.js';
 import { siteName } from './url.js';
@@ -54,18 +54,28 @@ async function handleDropUrl(key, url) {
   }
 }
 
-function handleKeydown(event) {
-  if (editor.isOpen || event.repeat) return;
-  // Prefix + key works here too, the same as on web pages.
-  const isPrefixShortcut = Boolean(settings.shortcutPrefix) && modifiersOf(event) === settings.shortcutPrefix;
-  const key = isPrefixShortcut ? keyFromCode(event.code) : keyFromEvent(event);
-  if (!key) return;
-  event.preventDefault();
+function openKey(key, trigger) {
   keyboard.flash(key);
   const url = settings.links[key];
-  const trigger = event.shiftKey && !isPrefixShortcut ? 'ShiftKey' : 'Key';
   if (url) openLink(url, settings.shortcuts[trigger]);
   else showToast(`${key.toUpperCase()} has no link yet. Click the key to add one.`);
+}
+
+// The prefix shortcut works here too, the same as on web pages.
+// prefixShortcut comes from prefix-shortcut.js.
+const handlePrefixShortcut = prefixShortcut.createMatcher({
+  getPrefix: () => (settings.pageShortcuts ? settings.shortcutPrefix : null),
+  isBound: (key) => Boolean(settings.links[key]),
+  onOpen: (key) => openKey(key, 'Key'),
+  onWaiting: () => showToast('Now press a key'),
+});
+
+function handleKeydown(event) {
+  if (editor.isOpen || event.repeat || handlePrefixShortcut(event)) return;
+  const key = keyFromEvent(event);
+  if (!key) return;
+  event.preventDefault();
+  openKey(key, event.shiftKey ? 'ShiftKey' : 'Key');
 }
 
 let toastTimer;

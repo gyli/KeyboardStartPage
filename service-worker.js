@@ -4,20 +4,20 @@
 import { loadSettings } from './src/storage.js';
 
 // --- Prefix shortcuts on web pages ---
-// The script runs on web pages only while a prefix is set and the user has
-// granted the optional access to websites.
+// The script runs on web pages only while "Open links from any page" is on
+// and the user has granted the optional access to websites.
 
 const PAGE_SCRIPT = {
   id: 'page-shortcuts',
-  js: ['src/page-shortcuts.js'],
+  js: ['src/prefix-shortcut.js', 'src/page-shortcuts.js'],
   matches: ['<all_urls>'],
   runAt: 'document_start',
 };
 const ALL_SITES = { origins: ['<all_urls>'] };
 
 async function updatePageScript() {
-  const { shortcutPrefix } = await chrome.storage.sync.get('shortcutPrefix');
-  const wanted = Boolean(shortcutPrefix) && (await chrome.permissions.contains(ALL_SITES));
+  const { pageShortcuts } = await chrome.storage.sync.get('pageShortcuts');
+  const wanted = Boolean(pageShortcuts) && (await chrome.permissions.contains(ALL_SITES));
   const registered = (await chrome.scripting.getRegisteredContentScripts({ ids: [PAGE_SCRIPT.id] })).length > 0;
   if (wanted && !registered) {
     await chrome.scripting.registerContentScripts([PAGE_SCRIPT]);
@@ -41,7 +41,7 @@ chrome.runtime.onInstalled.addListener(queuePageScriptUpdate);
 chrome.permissions.onAdded.addListener(queuePageScriptUpdate);
 chrome.permissions.onRemoved.addListener(queuePageScriptUpdate);
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'sync' && 'shortcutPrefix' in changes) queuePageScriptUpdate();
+  if (area === 'sync' && 'pageShortcuts' in changes) queuePageScriptUpdate();
 });
 
 // Opens a key's link from a web page, the same way pressing the key on the

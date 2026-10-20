@@ -152,7 +152,44 @@ input[role="switch"] {
   font-weight: 600;
 }
 
-.prefix-select {
-  width: auto;
-  min-width: 200px;
+.field.stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.prefix-builder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  & .plus { color: var(--muted); }
+}
+
+.chips {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.chip {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+  font: 500 13px var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover { color: var(--text); }
+  &[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--surface)); color: var(--accent); }
+}
+
+.key-chip {
+  min-width: 44px;
+  color: var(--text);
+
+  &.empty { border-style: dashed; color: var(--muted); }
+  &.recording { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
 }

@@ -1,5 +1,5 @@
 import {
-  DEFAULT_PREFERENCES, KEYS, OPEN_MODES, SHORTCUT_PREFIXES, TRIGGERS,
+  DEFAULT_PREFERENCES, KEYS, OPEN_MODES, TRIGGERS,
   exportBackup, importBackup, loadSettings, loadWallpaper, onSettingsChanged,
   onWallpaperChanged, setLink, setPreference, setShortcut, setWallpaper,
 } from './storage.js';
@@ -113,42 +113,103 @@ async function chooseWallpaper(file) {
   await save(setWallpaper(file), 'Wallpaper saved');
 }
 
-// --- Prefix shortcuts on any page ---
+// --- Prefix shortcut on any page ---
+// prefixShortcut comes from prefix-shortcut.js.
 const ALL_SITES = { origins: ['<all_urls>'] };
 const IS_MAC = navigator.platform.startsWith('Mac');
-const MODIFIER_NAMES = IS_MAC ? { Ctrl: '⌃ Control', Alt: '⌥ Option', Shift: '⇧ Shift' } : {};
+const MODIFIER_NAMES = IS_MAC
+  ? { Ctrl: '⌃ Control', Alt: '⌥ Option', Shift: '⇧ Shift', Meta: '⌘ Command' }
+  : { Ctrl: 'Ctrl', Alt: 'Alt', Shift: 'Shift', Meta: 'Win' };
+let currentPrefix = DEFAULT_PREFERENCES.shortcutPrefix;
+let recordingKey = false;
 
-// "Alt+Shift" -> "Alt + Shift", or "⌥ Option + ⇧ Shift" on a Mac.
-const formatPrefix = (prefix) => prefix.split('+').map((part) => MODIFIER_NAMES[part] ?? part).join(' + ');
-
-function buildPrefixOptions() {
-  const select = $('shortcut-prefix');
-  select.add(new Option('Off', ''));
-  for (const prefix of SHORTCUT_PREFIXES) select.add(new Option(`${formatPrefix(prefix)} + key`, prefix));
+function buildPrefixBuilder() {
+  for (const modifier of prefixShortcut.MODIFIERS) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'chip';
+    chip.dataset.modifier = modifier;
+    chip.textContent = MODIFIER_NAMES[modifier];
+    chip.addEventListener('click', () => toggleModifier(modifier));
+    $('prefix-modifiers').append(chip);
+  }
 }
 
-function renderPrefix({ shortcutPrefix, links }) {
-  $('shortcut-prefix').value = shortcutPrefix ?? '';
-  const example = [...KEYS].find((key) => links[key]) ?? 'g';
-  $('prefix-example').textContent = shortcutPrefix
-    ? `Press ${formatPrefix(shortcutPrefix)} + ${example.toUpperCase()} on any website to open the link on ${example.toUpperCase()}.`
-    : 'Hold the prefix and press a key to open its link from any website.';
+function renderPrefix({ pageShortcuts, shortcutPrefix, links }) {
+  currentPrefix = prefixShortcut.parse(shortcutPrefix) ? shortcutPrefix : DEFAULT_PREFERENCES.shortcutPrefix;
+  const { modifiers, key } = prefixShortcut.parse(currentPrefix);
+  $('page-shortcuts').checked = pageShortcuts;
+  for (const chip of $('prefix-modifiers').children) {
+    chip.setAttribute('aria-pressed', modifiers.includes(chip.dataset.modifier));
+  }
+  if (!recordingKey) $('prefix-key').textContent = key ? prefixShortcut.keyLabel(key) : 'Add key';
+  $('prefix-key').classList.toggle('empty', !key);
+  $('prefix-key-clear').hidden = !key;
+
+  const shortcut = prefixShortcut.format(currentPrefix, IS_MAC);
+  const example = ([...KEYS].find((k) => links[k]) ?? 'g').toUpperCase();
+  const joiner = IS_MAC ? '' : ' + ';
+  $('prefix-example').textContent = key
+    ? `On any website, press ${shortcut}, then ${example} to open the link on ${example}.`
+    : `On any website, press ${shortcut}${joiner}${example} to open the link on ${example}.`;
 }
 
-function changePrefix(event) {
-  const prefix = event.target.value || null;
-  if (!prefix) {
+function savePrefix(prefix) {
+  return save(setPreference('shortcutPrefix', prefix), `Prefix is now ${prefixShortcut.format(prefix, IS_MAC)}`);
+}
+
+function toggleModifier(modifier) {
+  const prefix = prefixShortcut.parse(currentPrefix);
+  const modifiers = prefix.modifiers.includes(modifier)
+    ? prefix.modifiers.filter((m) => m !== modifier)
+    : [...prefix.modifiers, modifier];
+  const next = prefixShortcut.serialize({ modifiers, key: prefix.key });
+  if (!prefixShortcut.parse(next)) {
+    showToast(`The prefix needs ${MODIFIER_NAMES.Ctrl}, ${MODIFIER_NAMES.Alt} or ${MODIFIER_NAMES.Meta}.`);
+    return;
+  }
+  savePrefix(next);
+}
+
+function startRecordingKey() {
+  recordingKey = true;
+  $('prefix-key').textContent = 'Press a key…';
+  $('prefix-key').classList.add('recording');
+}
+
+async function stopRecordingKey() {
+  recordingKey = false;
+  $('prefix-key').classList.remove('recording');
+  renderPrefix(await loadSettings());
+}
+
+// While recording, the next key press becomes the prefix's extra key.
+// Escape cancels; Backspace or Delete removes the key.
+async function handleRecordingKeydown(event) {
+  if (!recordingKey || ['Control', 'Alt', 'Shift', 'Meta', 'OS'].includes(event.key)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const { modifiers } = prefixShortcut.parse(currentPrefix);
+  if (event.key === 'Escape') return stopRecordingKey();
+  const key = ['Backspace', 'Delete'].includes(event.key) ? null : event.code;
+  recordingKey = false;
+  await savePrefix(prefixShortcut.serialize({ modifiers, key }));
+  await stopRecordingKey();
+}
+
+function changePageShortcuts(event) {
+  if (!event.target.checked) {
     chrome.permissions.remove(ALL_SITES);
-    save(setPreference('shortcutPrefix', null), 'Shortcuts turned off');
+    save(setPreference('pageShortcuts', false), 'Turned off');
     return;
   }
   // Ask right away: Chrome only shows the prompt during a user action.
   chrome.permissions.request(ALL_SITES).then((granted) => {
     if (granted) {
-      save(setPreference('shortcutPrefix', prefix), `Saved. Try ${formatPrefix(prefix)} + a key on any website.`);
+      save(setPreference('pageShortcuts', true), `Turned on. Try ${prefixShortcut.format(currentPrefix, IS_MAC)} on any website.`);
     } else {
-      showToast('Shortcuts need access to websites to work.');
-      loadSettings().then(renderPrefix);
+      event.target.checked = false;
+      showToast('This needs access to websites to work.');
     }
   });
 }
@@ -192,8 +253,15 @@ async function restoreBackup(file) {
 buildShortcuts();
 onSettingsChanged(render);
 onWallpaperChanged(renderWallpaper);
-buildPrefixOptions();
-$('shortcut-prefix').addEventListener('change', changePrefix);
+buildPrefixBuilder();
+$('page-shortcuts').addEventListener('change', changePageShortcuts);
+$('prefix-key').addEventListener('click', startRecordingKey);
+$('prefix-key').addEventListener('blur', () => recordingKey && stopRecordingKey());
+$('prefix-key-clear').addEventListener('click', () => {
+  const { modifiers } = prefixShortcut.parse(currentPrefix);
+  savePrefix(prefixShortcut.serialize({ modifiers, key: null }));
+});
+document.addEventListener('keydown', handleRecordingKeydown, true);
 
 for (const radio of document.querySelectorAll('input[name="theme"]')) {
   radio.addEventListener('change', () => save(setPreference('theme', radio.value)));

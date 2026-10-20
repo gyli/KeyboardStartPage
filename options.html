@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Keyboard Start Page Settings</title>
   <script src="src/boot.js"></script>
+  <script src="src/prefix-shortcut.js"></script>
   <link rel="stylesheet" href="styles/base.css">
   <link rel="stylesheet" href="styles/options.css">
   <script type="module" src="src/options.js"></script>
@@ -70,14 +71,24 @@
 
     <section class="card">
       <h2>Open links from any page</h2>
-      <div class="field">
+      <label class="field toggle">
         <span>
-          <span class="field-label">Shortcut prefix</span>
+          <span class="field-label">Use a shortcut on websites</span>
           <span id="prefix-example" class="description"></span>
         </span>
-        <select id="shortcut-prefix" class="prefix-select"></select>
+        <input id="page-shortcuts" type="checkbox" role="switch">
+      </label>
+      <div class="field stacked">
+        <span class="field-label">Shortcut prefix</span>
+        <div class="prefix-builder">
+          <div id="prefix-modifiers" class="chips" role="group" aria-label="Modifier keys"></div>
+          <span class="plus" aria-hidden="true">+</span>
+          <button id="prefix-key" class="chip key-chip" type="button" title="Optional: a key to press after the modifiers, before the link's key"></button>
+          <button id="prefix-key-clear" class="icon-button small" type="button" title="Remove this key" aria-label="Remove this key" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
       </div>
-      <p class="description">Chrome asks once for access to websites. The extension only listens for these shortcuts and never reads or changes pages. Shortcuts don't work on Chrome's own pages or the Chrome Web Store. You can also click the extension's icon in the toolbar to open the keyboard.</p>
     </section>
 
     <section class="card">

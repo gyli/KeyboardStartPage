@@ -120,7 +120,7 @@ input[role="switch"] {
 
 .shortcut {
   display: grid;
-  grid-template-columns: 1fr 240px;
+  grid-template-columns: 1fr 220px;
   align-items: center;
   gap: 16px;
   font-size: 14px;
@@ -134,7 +134,9 @@ input[role="switch"] {
 
   & li { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
   & li + li { border-top: 1px solid var(--border); }
-  & img { width: 16px; height: 16px; }
+  /* Fixed sizes keep the key, icon and address aligned across rows. */
+  & kbd { flex: none; width: 2em; padding: 0; }
+  & img { flex: none; width: 16px; height: 16px; }
   & a { flex: 1; overflow: hidden; color: var(--text); font-size: 14px; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
   & a:hover { text-decoration: underline; }
   & .empty { color: var(--muted); font-size: 14px; }
@@ -185,5 +187,5 @@ input[role="switch"] {
 }
 
 .open-mode-select {
-  width: 240px;
+  width: 220px;
 }

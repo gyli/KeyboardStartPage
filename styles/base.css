@@ -72,7 +72,7 @@ kbd {
   &.danger { color: var(--danger); }
 }
 
-input[type="text"], input[type="url"], select {
+input[type="text"], input[type="url"] {
   width: 100%;
   padding: 9px 12px;
   border: 1px solid var(--border);
@@ -83,6 +83,24 @@ input[type="text"], input[type="url"], select {
 
   &:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
 }
+
+/* Dropdowns look like .button, with a small arrow instead of Chrome's own. */
+select {
+  appearance: none;
+  height: 36px;
+  padding: 0 34px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%238a8a93' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center / 12px;
+  color: var(--text);
+  font: 500 14px var(--font);
+  cursor: pointer;
+
+  &:hover { background-color: var(--surface-hover); }
+  &:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+}
+
+.button { height: 36px; }
 
 .icon-button {
   display: grid;

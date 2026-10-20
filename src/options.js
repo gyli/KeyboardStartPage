@@ -51,8 +51,9 @@ function renderLinks(links, names) {
 
     const icon = document.createElement('img');
     icon.alt = '';
-    icon.hidden = true;
-    icon.addEventListener('load', () => { icon.hidden = false; });
+    // Invisible until it loads, but it keeps its space so the rows line up.
+    icon.style.visibility = 'hidden';
+    icon.addEventListener('load', () => { icon.style.visibility = ''; });
     const src = faviconUrl(links[key]);
     if (src) icon.src = src;
 

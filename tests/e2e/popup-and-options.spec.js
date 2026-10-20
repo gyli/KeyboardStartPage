@@ -28,7 +28,6 @@ test('settings show saved values and save changes', async ({ seed, open }) => {
   const page = await open('options.html');
 
   await expect(page.locator('select[data-trigger="ShiftKey"]')).toHaveValue('window');
-  await expect(page.locator('#launcher-chrome-shortcut')).toHaveText(/Not set/);
   await expect(page.locator('#links li')).toHaveText(/Example/);
 
   await page.locator('select[data-trigger="Key"]').selectOption('active');
@@ -90,47 +89,64 @@ test('"Focus the page on new tabs" gives the page keyboard focus', async ({ cont
   expect(await page.evaluate(() => document.hasFocus())).toBe(true);
 });
 
-test('the launcher shortcut is recorded from a key press', async ({ seed, open }) => {
-  await seed({});
+test('choosing a shortcut prefix asks for website access, and Off removes it', async ({ seed, open }) => {
+  await seed({ li_g: SITE });
   const page = await open('options.html');
   // Stand in for Chrome's permission prompt, which tests can't click.
-  await page.evaluate(() => { chrome.permissions.request = async () => true; });
+  await page.evaluate(() => {
+    window.permissionCalls = [];
+    chrome.permissions.request = async (p) => { permissionCalls.push(['request', p.origins]); return true; };
+    chrome.permissions.remove = async (p) => { permissionCalls.push(['remove', p.origins]); return true; };
+  });
+  const select = page.locator('#shortcut-prefix');
+  await expect(select).toHaveValue('');
 
-  await page.getByRole('button', { name: 'Set shortcut' }).click();
-  await expect(page.locator('#launcher-record')).toHaveText('Press keys…');
-  await page.keyboard.press('k');
-  await expect(page.locator('#toast')).toHaveText(/Include Ctrl, Alt or ⌘/);
-  await page.keyboard.press('Alt+Shift+K');
-  await expect(page.locator('#toast')).toHaveText(/Shortcut saved/);
-  expect(await storage(page)).toMatchObject({ launcherShortcut: 'Alt+Shift+KeyK' });
-  await expect(page.locator('#launcher-clear')).toBeVisible();
+  await select.selectOption('Alt+Shift');
+  await expect(page.locator('#toast')).toHaveText(/Saved/);
+  expect(await storage(page)).toMatchObject({ shortcutPrefix: 'Alt+Shift' });
+  await expect(page.locator('#prefix-example')).toHaveText(/\+ G on any website/);
 
-  await page.getByRole('button', { name: 'Turn off' }).click();
-  await expect(page.locator('#toast')).toHaveText('Shortcut turned off');
-  expect(await storage(page)).not.toHaveProperty('launcherShortcut');
+  await select.selectOption('');
+  await expect(page.locator('#toast')).toHaveText('Shortcuts turned off');
+  expect(await storage(page)).not.toHaveProperty('shortcutPrefix');
+  expect(await page.evaluate(() => permissionCalls)).toEqual([['request', ['<all_urls>']], ['remove', ['<all_urls>']]]);
+});
+
+test('declining website access keeps shortcuts off', async ({ seed, open }) => {
+  await seed({});
+  const page = await open('options.html');
+  await page.evaluate(() => { chrome.permissions.request = async () => false; });
+  await page.locator('#shortcut-prefix').selectOption('Alt');
+  await expect(page.locator('#toast')).toHaveText(/need access to websites/);
+  await expect(page.locator('#shortcut-prefix')).toHaveValue('');
+  expect(await storage(page)).not.toHaveProperty('shortcutPrefix');
 });
 
 test.describe('with access to websites', () => {
   test.use({ allSitesAccess: true });
 
-  test('the launcher shortcut opens the popup from a web page', async ({ context, serviceWorker, site, seed }) => {
-    await seed({ launcherShortcut: 'Alt+KeyK' });
-    await expect.poll(() => serviceWorker.evaluate(async () =>
-      (await chrome.scripting.getRegisteredContentScripts()).map((script) => script.id))).toEqual(['launcher']);
-    // Count popup requests instead of opening it: headless Chromium has no toolbar.
-    await serviceWorker.evaluate(() => {
-      self.popupRequests = 0;
-      chrome.action.openPopup = async () => { self.popupRequests++; };
-    });
+  const registeredScripts = (serviceWorker) => serviceWorker.evaluate(async () =>
+    (await chrome.scripting.getRegisteredContentScripts()).map((script) => script.id));
 
+  test('prefix + key opens the link from a web page', async ({ context, serviceWorker, site, seed }) => {
+    // This page is open before the prefix is set, and must not need a reload.
     const page = await context.newPage();
-    await page.goto(site);
-    await page.keyboard.press('Alt+J');
-    await page.keyboard.press('Alt+K');
-    await expect.poll(() => serviceWorker.evaluate(() => self.popupRequests)).toBe(1);
+    await page.goto(`${site}start`);
+
+    await seed({ li_e: `${site}target`, shortcutPrefix: 'Alt' });
+    await expect.poll(() => registeredScripts(serviceWorker)).toEqual(['page-shortcuts']);
+
+    // Q has no link, so the page keeps the key press.
+    await page.keyboard.press('Alt+Q');
+    await page.waitForTimeout(300);
+    await expect(page).toHaveURL(`${site}start`);
+
+    await expect(async () => {
+      await page.keyboard.press('Alt+E');
+      await expect(page).toHaveURL(`${site}target`, { timeout: 1000 });
+    }).toPass();
 
     await seed({});
-    await expect.poll(() => serviceWorker.evaluate(async () =>
-      (await chrome.scripting.getRegisteredContentScripts()).length)).toBe(0);
+    await expect.poll(() => registeredScripts(serviceWorker)).toEqual([]);
   });
 });

@@ -1,5 +1,5 @@
 import { loadSettings, loadWallpaper, onSettingsChanged, onWallpaperChanged, setLink } from './storage.js';
-import { createKeyboard, keyFromEvent } from './keyboard.js';
+import { createKeyboard, keyFromCode, keyFromEvent, modifiersOf } from './keyboard.js';
 import { createEditor } from './editor.js';
 import { openLink } from './open.js';
 import { siteName } from './url.js';
@@ -55,13 +55,16 @@ async function handleDropUrl(key, url) {
 }
 
 function handleKeydown(event) {
-  if (editor.isOpen) return;
-  const key = keyFromEvent(event);
+  if (editor.isOpen || event.repeat) return;
+  // Prefix + key works here too, the same as on web pages.
+  const isPrefixShortcut = Boolean(settings.shortcutPrefix) && modifiersOf(event) === settings.shortcutPrefix;
+  const key = isPrefixShortcut ? keyFromCode(event.code) : keyFromEvent(event);
   if (!key) return;
   event.preventDefault();
   keyboard.flash(key);
   const url = settings.links[key];
-  if (url) openLink(url, settings.shortcuts[event.shiftKey ? 'ShiftKey' : 'Key']);
+  const trigger = event.shiftKey && !isPrefixShortcut ? 'ShiftKey' : 'Key';
+  if (url) openLink(url, settings.shortcuts[trigger]);
   else showToast(`${key.toUpperCase()} has no link yet. Click the key to add one.`);
 }
 

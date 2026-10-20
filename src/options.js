@@ -1,5 +1,5 @@
 import {
-  DEFAULT_PREFERENCES, KEYS, OPEN_MODES, TRIGGERS,
+  DEFAULT_PREFERENCES, KEYS, OPEN_MODES, SHORTCUT_PREFIXES, TRIGGERS,
   exportBackup, importBackup, loadSettings, loadWallpaper, onSettingsChanged,
   onWallpaperChanged, setLink, setPreference, setShortcut, setWallpaper,
 } from './storage.js';
@@ -90,7 +90,7 @@ function render(settings) {
     select.value = settings.shortcuts[select.dataset.trigger];
   }
   renderLinks(settings.links, settings.names);
-  renderLauncher(settings);
+  renderPrefix(settings);
 }
 
 let wallpaperUrl;
@@ -113,62 +113,44 @@ async function chooseWallpaper(file) {
   await save(setWallpaper(file), 'Wallpaper saved');
 }
 
-// --- Quick launcher ---
-// shortcutFromEvent() and formatShortcut() come from shortcut-keys.js.
+// --- Prefix shortcuts on any page ---
 const ALL_SITES = { origins: ['<all_urls>'] };
-let recording = false;
+const IS_MAC = navigator.platform.startsWith('Mac');
+const MODIFIER_NAMES = IS_MAC ? { Ctrl: '⌃ Control', Alt: '⌥ Option', Shift: '⇧ Shift' } : {};
 
-async function renderLauncher({ launcherShortcut }) {
-  const hasAccess = await chrome.permissions.contains(ALL_SITES);
-  const button = $('launcher-record');
-  if (!recording) {
-    button.textContent = launcherShortcut ? formatShortcut(launcherShortcut) : 'Set shortcut';
-    if (launcherShortcut && !hasAccess) button.textContent += ' (needs access)';
-  }
-  $('launcher-clear').hidden = !launcherShortcut;
+// "Alt+Shift" -> "Alt + Shift", or "⌥ Option + ⇧ Shift" on a Mac.
+const formatPrefix = (prefix) => prefix.split('+').map((part) => MODIFIER_NAMES[part] ?? part).join(' + ');
+
+function buildPrefixOptions() {
+  const select = $('shortcut-prefix');
+  select.add(new Option('Off', ''));
+  for (const prefix of SHORTCUT_PREFIXES) select.add(new Option(`${formatPrefix(prefix)} + key`, prefix));
 }
 
-function startRecording() {
-  recording = true;
-  $('launcher-record').textContent = 'Press keys…';
-  $('launcher-record').classList.add('recording');
+function renderPrefix({ shortcutPrefix, links }) {
+  $('shortcut-prefix').value = shortcutPrefix ?? '';
+  const example = [...KEYS].find((key) => links[key]) ?? 'g';
+  $('prefix-example').textContent = shortcutPrefix
+    ? `Press ${formatPrefix(shortcutPrefix)} + ${example.toUpperCase()} on any website to open the link on ${example.toUpperCase()}.`
+    : 'Hold the prefix and press a key to open its link from any website.';
 }
 
-async function stopRecording() {
-  recording = false;
-  $('launcher-record').classList.remove('recording');
-  await renderLauncher(await loadSettings());
-}
-
-async function handleRecordingKey(event) {
-  if (!recording) return;
-  event.preventDefault();
-  event.stopPropagation();
-  if (event.key === 'Escape') return stopRecording();
-  const shortcut = shortcutFromEvent(event);
-  if (!shortcut) {
-    if (!/^(Control|Alt|Shift|Meta)$/.test(event.key)) showToast('Include Ctrl, Alt or ⌘ in the shortcut.');
+function changePrefix(event) {
+  const prefix = event.target.value || null;
+  if (!prefix) {
+    chrome.permissions.remove(ALL_SITES);
+    save(setPreference('shortcutPrefix', null), 'Shortcuts turned off');
     return;
   }
-  // The key press counts as a user action, which Chrome requires for this request.
-  const granted = await chrome.permissions.request(ALL_SITES);
-  if (granted) await save(setPreference('launcherShortcut', shortcut), 'Shortcut saved. Reload open pages to use it there.');
-  else showToast('The shortcut needs access to websites to work.');
-  await stopRecording();
-}
-
-async function turnOffLauncher() {
-  await setPreference('launcherShortcut', null);
-  await chrome.permissions.remove(ALL_SITES);
-  showToast('Shortcut turned off');
-}
-
-// Chrome's own shortcut can only be changed on Chrome's shortcuts page.
-async function renderChromeShortcut() {
-  const commands = await chrome.commands.getAll();
-  const shortcut = commands.find((command) => command.name === '_execute_action')?.shortcut;
-  $('launcher-chrome-shortcut').textContent = (shortcut ? `Currently ${shortcut}. ` : 'Not set. ')
-    + 'Also works on Chrome\'s own pages, where the shortcut above can\'t.';
+  // Ask right away: Chrome only shows the prompt during a user action.
+  chrome.permissions.request(ALL_SITES).then((granted) => {
+    if (granted) {
+      save(setPreference('shortcutPrefix', prefix), `Saved. Try ${formatPrefix(prefix)} + a key on any website.`);
+    } else {
+      showToast('Shortcuts need access to websites to work.');
+      loadSettings().then(renderPrefix);
+    }
+  });
 }
 
 let toastTimer;
@@ -210,11 +192,8 @@ async function restoreBackup(file) {
 buildShortcuts();
 onSettingsChanged(render);
 onWallpaperChanged(renderWallpaper);
-// Pick up shortcut changes when the user comes back from Chrome's shortcuts page.
-window.addEventListener('focus', renderChromeShortcut);
-document.addEventListener('keydown', handleRecordingKey, true);
-// Leaving the button cancels recording.
-$('launcher-record').addEventListener('blur', () => recording && stopRecording());
+buildPrefixOptions();
+$('shortcut-prefix').addEventListener('change', changePrefix);
 
 for (const radio of document.querySelectorAll('input[name="theme"]')) {
   radio.addEventListener('change', () => save(setPreference('theme', radio.value)));
@@ -223,9 +202,6 @@ $('bg-color').addEventListener('change', (event) => save(setPreference('bgColor'
 $('bg-reset').addEventListener('click', () => save(setPreference('bgColor', DEFAULT_PREFERENCES.bgColor)));
 $('show-hints').addEventListener('change', (event) => save(setPreference('showHints', event.target.checked)));
 $('focus-page').addEventListener('change', (event) => save(setPreference('focusPage', event.target.checked)));
-$('launcher-record').addEventListener('click', startRecording);
-$('launcher-clear').addEventListener('click', turnOffLauncher);
-$('launcher-change').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
 $('wallpaper-choose').addEventListener('click', () => $('wallpaper-file').click());
 $('wallpaper-file').addEventListener('change', (event) => {
   const [file] = event.target.files;
@@ -243,4 +219,3 @@ $('import').addEventListener('change', (event) => {
 
 render(await loadSettings());
 renderWallpaper(await loadWallpaper());
-renderChromeShortcut();

@@ -5,9 +5,5 @@
   "appDesc": {
     "message": "按一个键即可打开常用网站。可在新标签页使用，也可在任意页面通过快捷键打开。",
     "description": "Store and extensions page description. 132 characters at most."
-  },
-  "commandDesc": {
-    "message": "打开键盘面板",
-    "description": "Shown on chrome://extensions/shortcuts for the shortcut that opens the popup."
   }
 }

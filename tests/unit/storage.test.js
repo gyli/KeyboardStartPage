@@ -65,7 +65,7 @@ test('setLink saves an optional name and removing the link removes it', async ()
 });
 
 test('backups round-trip and reject bad values', async () => {
-  areas.sync = { default: 'passed', li_a: 'https://a.example/', name_a: 'A', theme: 'dark', ShiftKey: 'window' };
+  areas.sync = { default: 'passed', li_a: 'https://a.example/', name_a: 'A', theme: 'dark', ShiftKey: 'window', shortcutPrefix: 'Ctrl+Alt' };
   const backup = await storage.exportBackup();
   areas.sync = {};
   await storage.importBackup(backup);
@@ -74,11 +74,12 @@ test('backups round-trip and reject bad values', async () => {
   assert.deepEqual(settings.names, { a: 'A' });
   assert.equal(settings.theme, 'dark');
   assert.equal(settings.shortcuts.ShiftKey, 'window');
+  assert.equal(settings.shortcutPrefix, 'Ctrl+Alt');
 
   await storage.importBackup({
     app: 'keyboard-start-page',
     links: { a: 'javascript:alert(1)', b: 'example.org', zz: 'https://x.example/' },
-    preferences: { theme: 'neon', bgColor: 'red', focusPage: 'yes' },
+    preferences: { theme: 'neon', bgColor: 'red', focusPage: 'yes', shortcutPrefix: 'Shift' },
   });
   assert.deepEqual(areas.sync, { default: 'passed', li_b: 'https://example.org/' });
 

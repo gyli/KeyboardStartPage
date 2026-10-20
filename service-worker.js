@@ -1,43 +1,68 @@
 // The extension's service worker. It does two things:
-// 1. Runs the custom launcher shortcut (see src/launcher.js).
+// 1. Runs the prefix shortcuts on web pages (see src/page-shortcuts.js).
 // 2. Caches site icons (below).
+import { loadSettings } from './src/storage.js';
 
-// --- Custom launcher shortcut ---
-// The launcher script runs on web pages only while a shortcut is set and the
-// user has granted the optional access to websites.
+// --- Prefix shortcuts on web pages ---
+// The script runs on web pages only while a prefix is set and the user has
+// granted the optional access to websites.
 
-const LAUNCHER_SCRIPT = {
-  id: 'launcher',
-  js: ['src/shortcut-keys.js', 'src/launcher.js'],
+const PAGE_SCRIPT = {
+  id: 'page-shortcuts',
+  js: ['src/page-shortcuts.js'],
   matches: ['<all_urls>'],
   runAt: 'document_start',
 };
 const ALL_SITES = { origins: ['<all_urls>'] };
 
-async function updateLauncherScript() {
-  const { launcherShortcut } = await chrome.storage.sync.get('launcherShortcut');
-  const wanted = Boolean(launcherShortcut) && (await chrome.permissions.contains(ALL_SITES));
-  const registered = (await chrome.scripting.getRegisteredContentScripts({ ids: [LAUNCHER_SCRIPT.id] })).length > 0;
-  if (wanted && !registered) await chrome.scripting.registerContentScripts([LAUNCHER_SCRIPT]);
-  if (!wanted && registered) await chrome.scripting.unregisterContentScripts({ ids: [LAUNCHER_SCRIPT.id] });
+async function updatePageScript() {
+  const { shortcutPrefix } = await chrome.storage.sync.get('shortcutPrefix');
+  const wanted = Boolean(shortcutPrefix) && (await chrome.permissions.contains(ALL_SITES));
+  const registered = (await chrome.scripting.getRegisteredContentScripts({ ids: [PAGE_SCRIPT.id] })).length > 0;
+  if (wanted && !registered) {
+    await chrome.scripting.registerContentScripts([PAGE_SCRIPT]);
+    // Registered scripts only run on pages loaded from now on, so add it to open tabs too.
+    for (const tab of await chrome.tabs.query({})) {
+      chrome.scripting.executeScript({ target: { tabId: tab.id }, files: PAGE_SCRIPT.js }).catch(() => {
+        // Chrome's own pages and the Web Store don't allow scripts.
+      });
+    }
+  }
+  if (!wanted && registered) await chrome.scripting.unregisterContentScripts({ ids: [PAGE_SCRIPT.id] });
 }
 
 // Updates run one at a time, so two events in a row can't register the script twice.
 let pendingUpdate = Promise.resolve();
-function queueLauncherUpdate() {
-  pendingUpdate = pendingUpdate.then(updateLauncherScript).catch((error) => console.error(error));
+function queuePageScriptUpdate() {
+  pendingUpdate = pendingUpdate.then(updatePageScript).catch((error) => console.error(error));
 }
 
-chrome.runtime.onInstalled.addListener(queueLauncherUpdate);
-chrome.permissions.onAdded.addListener(queueLauncherUpdate);
-chrome.permissions.onRemoved.addListener(queueLauncherUpdate);
+chrome.runtime.onInstalled.addListener(queuePageScriptUpdate);
+chrome.permissions.onAdded.addListener(queuePageScriptUpdate);
+chrome.permissions.onRemoved.addListener(queuePageScriptUpdate);
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'sync' && 'launcherShortcut' in changes) queueLauncherUpdate();
+  if (area === 'sync' && 'shortcutPrefix' in changes) queuePageScriptUpdate();
 });
 
-chrome.runtime.onMessage.addListener((message) => {
-  // Fails quietly if the window isn't focused; there's nothing useful to do then.
-  if (message?.type === 'open-launcher') chrome.action.openPopup().catch(() => {});
+// Opens a key's link from a web page, the same way pressing the key on the
+// new tab page would. New tabs open next to the page.
+async function openKey(key, tab) {
+  const settings = await loadSettings();
+  const url = settings.links[key];
+  if (!url) return;
+  switch (settings.shortcuts.Key) {
+    case 'same':
+      return chrome.tabs.update(tab.id, { url });
+    case 'active':
+    case 'inactive':
+      return chrome.tabs.create({ url, active: settings.shortcuts.Key === 'active', index: tab.index + 1, windowId: tab.windowId });
+    case 'window':
+      return chrome.windows.create({ url });
+  }
+}
+
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (message?.type === 'open-key' && sender.tab) openKey(message.key, sender.tab);
 });
 
 // --- Site icon cache ---

@@ -62,6 +62,14 @@ test('pressing a key opens its link, and Shift opens it in the background', asyn
   await expect(page).toHaveURL(site);
 });
 
+test('the shortcut prefix works on the new tab page too', async ({ site, seed, open }) => {
+  await seed({ li_e: site, shortcutPrefix: 'Alt+Shift' });
+  const page = await open('newtab.html');
+  await expect(key(page, 'e')).toHaveClass(/bound/);
+  await page.keyboard.press('Alt+Shift+E');
+  await expect(page).toHaveURL(site);
+});
+
 test('pressing an empty key explains how to add a link', async ({ seed, open }) => {
   await seed({});
   const page = await open('newtab.html');

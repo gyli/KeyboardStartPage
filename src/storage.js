@@ -35,8 +35,12 @@ export const DEFAULT_PREFERENCES = {
   bgColor: null, // null means "use the theme's background"
   focusPage: false,
   showHints: true,
-  launcherShortcut: null, // e.g. "Alt+KeyK"; see src/shortcut-keys.js
+  shortcutPrefix: null, // one of SHORTCUT_PREFIXES: prefix + key opens a link from any page
 };
+
+// Modifier combinations offered as the prefix for opening links from any page.
+// Written in the order modifiersOf() in keyboard.js produces.
+export const SHORTCUT_PREFIXES = ['Alt', 'Alt+Shift', 'Ctrl+Shift', 'Ctrl+Alt'];
 
 const STARTER_LINKS = {
   g: 'https://www.google.com/',
@@ -191,7 +195,7 @@ export async function importBackup(backup) {
   const preferences = backup.preferences ?? {};
   if (['system', 'light', 'dark'].includes(preferences.theme)) raw.theme = preferences.theme;
   if (/^#[\da-f]{6}$/i.test(preferences.bgColor)) raw.bgColor = preferences.bgColor;
-  if (/^((Ctrl|Alt|Shift|Meta)\+)+\w+$/.test(preferences.launcherShortcut)) raw.launcherShortcut = preferences.launcherShortcut;
+  if (SHORTCUT_PREFIXES.includes(preferences.shortcutPrefix)) raw.shortcutPrefix = preferences.shortcutPrefix;
   for (const name of ['focusPage', 'showHints']) {
     if (typeof preferences[name] === 'boolean') raw[name] = preferences[name];
   }

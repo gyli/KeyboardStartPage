@@ -5,9 +5,5 @@
   "appDesc": {
     "message": "Open your favorite websites with one key, on the new tab page or from any page with a shortcut.",
     "description": "Store and extensions page description. 132 characters at most."
-  },
-  "commandDesc": {
-    "message": "Open the keyboard",
-    "description": "Shown on chrome://extensions/shortcuts for the shortcut that opens the popup."
   }
 }

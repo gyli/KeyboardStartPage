@@ -5,9 +5,5 @@
   "appDesc": {
     "message": "按一個鍵即可開啟常用網站。可在新分頁使用，也可在任何頁面透過快速鍵開啟。",
     "description": "Store and extensions page description. 132 characters at most."
-  },
-  "commandDesc": {
-    "message": "開啟鍵盤面板",
-    "description": "Shown on chrome://extensions/shortcuts for the shortcut that opens the popup."
   }
 }

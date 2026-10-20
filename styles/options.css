@@ -152,13 +152,7 @@ input[role="switch"] {
   font-weight: 600;
 }
 
-.shortcut-button {
-  min-width: 120px;
-  font-variant-numeric: tabular-nums;
-
-  &.recording {
-    border-color: var(--accent);
-    color: var(--accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
-  }
+.prefix-select {
+  width: auto;
+  min-width: 200px;
 }

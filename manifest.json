@@ -4,11 +4,12 @@
   "description": "__MSG_appDesc__",
   "default_locale": "en",
   "version": "1.0.0",
-  "minimum_chrome_version": "127",
+  "minimum_chrome_version": "123",
   "permissions": ["storage", "unlimitedStorage", "activeTab", "scripting"],
   "optional_host_permissions": ["<all_urls>"],
   "background": {
-    "service_worker": "service-worker.js"
+    "service_worker": "service-worker.js",
+    "type": "module"
   },
   "chrome_url_overrides": {
     "newtab": "newtab.html"
@@ -16,11 +17,6 @@
   "action": {
     "default_title": "__MSG_appName__",
     "default_popup": "popup.html"
-  },
-  "commands": {
-    "_execute_action": {
-      "description": "__MSG_commandDesc__"
-    }
   },
   "options_ui": {
     "page": "options.html",

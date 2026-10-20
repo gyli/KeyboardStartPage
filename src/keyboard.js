@@ -4,8 +4,7 @@ import { faviconUrl, isWebUrl, normalizeUrl, siteName } from './url.js';
 import { modeForClick, openLink } from './open.js';
 
 const KEY_HTML = `
-  <a class="key-cap"><span class="key-label"></span><img class="key-icon" alt="" hidden></a>
-  <span class="key-name" aria-hidden="true"></span>
+  <a class="key-cap"><span class="key-label"></span><img class="key-icon" alt="" hidden><span class="key-name" aria-hidden="true"></span></a>
   <button class="key-edit" type="button" tabindex="-1" aria-label="Edit link">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>
   </button>`;
@@ -131,12 +130,25 @@ export function createKeyboard(container, { onEdit, onOpen, onDropUrl }) {
   return { render, flash };
 }
 
+// "Ctrl+Alt+Shift+Meta" order, matching SHORTCUT_PREFIXES in storage.js.
+// Keep in sync with src/page-shortcuts.js.
+export function modifiersOf(event) {
+  return [event.ctrlKey && 'Ctrl', event.altKey && 'Alt', event.shiftKey && 'Shift', event.metaKey && 'Meta']
+    .filter(Boolean).join('+');
+}
+
+// The key for a prefix shortcut. Uses the physical key, because Alt/Option
+// changes the typed character on a Mac.
+export function keyFromCode(code) {
+  const match = /^(?:Key([A-Z])|Digit(\d))$/.exec(code);
+  return match ? (match[1] ?? match[2]).toLowerCase() : null;
+}
+
 // Prefer the typed character so non-QWERTY layouts open the key they see printed.
 // Fall back to the physical key for layouts without Latin letters, and for Shift + digit.
 export function keyFromEvent(event) {
   if (event.ctrlKey || event.metaKey || event.altKey || event.repeat || event.isComposing) return null;
   const char = event.key.toLowerCase();
   if (/^[a-z0-9]$/.test(char)) return char;
-  const match = /^(?:Key([A-Z])|Digit(\d))$/.exec(event.code);
-  return match ? (match[1] ?? match[2]).toLowerCase() : null;
+  return keyFromCode(event.code);
 }

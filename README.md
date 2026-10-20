@@ -6,14 +6,15 @@ A Chrome new tab page that shows a keyboard. Give each key a website, then press
 
 ## Install
 
-Get it from the [Chrome Web Store](https://chromewebstore.google.com/detail/keyboard-start-page/lcgabkjfibeakijbhicjjilchhmjaiid). Requires Chrome 127 or later.
+Get it from the [Chrome Web Store](https://chromewebstore.google.com/detail/keyboard-start-page/lcgabkjfibeakijbhicjjilchhmjaiid). Requires Chrome 123 or later.
 
 ## Use
 
-- **Add a link:** click an empty key and type the address, or drag a link (from a page, the address bar or the bookmarks bar) onto a key. You can give a key an optional name, shown under the key.
+- **Add a link:** click an empty key and type the address, or drag a link (from a page, the address bar or the bookmarks bar) onto a key. You can give a key an optional name, shown in the key's corner.
 - **Change or remove a link:** hover a key and click the pencil.
 - **Open a link:** press the key, or click it.
-- **Quick launcher:** open the keyboard over any page with the toolbar icon or a shortcut, then press a key to go. Pressing an empty key there offers to add the page you're on. Set the shortcut in settings: any combination with Ctrl, Alt or ⌘ works on websites (Chrome asks once for access to websites). Chrome's own shortcut setting also works, including on Chrome's own pages.
+- **Open links from any page:** choose a shortcut prefix in settings, such as Alt or Alt + Shift. Then prefix + X opens the link on X from any website (Chrome asks once for access to websites). It doesn't work on Chrome's own pages or the Chrome Web Store.
+- **Toolbar popup:** click the extension's icon to open the keyboard over any page. Pressing an empty key there offers to add the page you're on.
 - **Wallpaper, theme and more:** click the gear in the bottom right corner.
 
 Chrome puts the cursor in the address bar on every new tab. Press <kbd>Tab</kbd> or click the page before pressing a key, or turn on **Focus the page on new tabs** in settings.
@@ -43,11 +44,11 @@ Run `npm install` once, then `npm test`. Unit tests (`tests/unit`) use Node's bu
 | `src/keyboard.js`, `styles/keyboard.css` | The keyboard, shared by the new tab page and the popup |
 | `src/editor.js` | The edit link dialog |
 | `src/open.js` | Opens links in the chosen tab or window |
-| `src/launcher.js`, `src/shortcut-keys.js` | The custom launcher shortcut on web pages |
+| `src/page-shortcuts.js` | Prefix shortcuts on web pages |
 | `src/storage.js` | Settings: defaults, loading, saving, migration, backup, wallpaper |
 | `src/url.js` | URL cleanup and display helpers |
 | `src/theme.js`, `src/boot.js` | Theme handling |
-| `service-worker.js` | Turns the launcher shortcut on and off, opens the popup, caches site icons |
+| `service-worker.js` | Turns prefix shortcuts on and off, opens their links, caches site icons |
 | `styles/base.css` | Colors and shared controls for light and dark mode |
 
 Settings are stored in `chrome.storage.sync` with the same key names as v0.4 (`li_<key>`, `Click`, `bgColor`, ...), so updating keeps existing users' links.

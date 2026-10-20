@@ -8,5 +8,5 @@ out="dist/keyboard-start-page-$version.zip"
 
 mkdir -p dist
 rm -f "$out"
-zip -qr "$out" manifest.json newtab.html options.html _locales icons/*.png src styles -x '.*'
+zip -qr "$out" manifest.json service-worker.js newtab.html popup.html options.html _locales icons/*.png src styles -x '.*'
 echo "$out"

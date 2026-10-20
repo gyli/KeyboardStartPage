@@ -1,0 +1,117 @@
+/* Keycaps, shared by the new tab page and the popup.
+   The look follows the original v0.4 design: raised keys with a radial face,
+   a 3px edge and a drop shadow. The letter never changes; a link adds an icon. */
+
+:root {
+  --cap-center: light-dark(#ffffff, #3b3b41);
+  --cap-middle: light-dark(#f6f6f6, #333338);
+  --cap-rim: light-dark(#ededed, #2b2b30);
+  --cap-highlight: light-dark(#ffffff, #4b4b52);
+  --cap-lowlight: light-dark(#eeeeee, #252529);
+  --cap-edge: light-dark(#dddddd, #151517);
+  --cap-shadow: light-dark(rgb(0 0 0 / 0.5), rgb(0 0 0 / 0.8));
+  --cap-text: light-dark(#999999, #a8a8b0);
+  --cap-text-shadow: light-dark(rgb(255 255 255 / 0.75), rgb(0 0 0 / 0.6));
+  --cap-pressed: light-dark(#ccccff, #3d4a78);
+}
+
+.keyboard {
+  --key-width: clamp(44px, 4.7vw, 72px);
+  --key-height: calc(var(--key-width) * 5 / 6);
+  --gap: calc(var(--key-width) * 0.27);
+
+  display: grid;
+  gap: calc(var(--gap) * 0.9);
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  gap: var(--gap);
+}
+
+.key {
+  position: relative;
+  width: var(--key-width);
+  height: var(--key-height);
+}
+
+.key-cap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-top: 1px solid var(--cap-highlight);
+  border-bottom: 1px solid var(--cap-lowlight);
+  border-radius: 6px;
+  background: radial-gradient(ellipse at center, var(--cap-center) 16%, var(--cap-middle) 75%, var(--cap-rim) 100%);
+  box-shadow: inset 0 0 2em rgb(0 0 0 / 0.05), 0 3px 0 var(--cap-edge), 0 3px 2px var(--cap-shadow);
+  color: var(--cap-text);
+  font: calc(var(--key-height) * 0.32) / 1 Frutiger, Helvetica, Arial, sans-serif;
+  text-decoration: none;
+  text-shadow: 0 1px 0 var(--cap-text-shadow);
+  cursor: pointer;
+  user-select: none;
+  transition: translate 0.1s linear, box-shadow 0.1s linear, background 0.1s linear;
+}
+
+/* Hovering presses the key down onto its edge, like the original. */
+.key:hover .key-cap,
+.key-cap:active,
+.key.pressed .key-cap {
+  translate: 0 3px;
+  border-top-color: var(--cap-lowlight);
+  box-shadow: inset 0 0 2em rgb(0 0 0 / 0.075), 0 0 2px var(--cap-shadow);
+}
+
+.key-cap:active,
+.key.pressed .key-cap {
+  background: var(--cap-pressed);
+}
+
+.key-icon {
+  --size: clamp(11px, calc(var(--key-height) * 0.3), 16px);
+
+  position: absolute;
+  left: calc(var(--size) / 4);
+  bottom: calc(var(--size) / 4);
+  width: var(--size);
+  height: var(--size);
+  border-radius: 4px;
+  opacity: 0.85;
+  transition: opacity 0.2s linear;
+}
+
+.key:hover .key-icon { opacity: 0.4; }
+
+.key.drop-target .key-cap {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.key-edit {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--cap-text);
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.15s, translate 0.1s linear;
+
+  & svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  &:hover { color: var(--text); background: color-mix(in srgb, var(--text) 10%, transparent); }
+}
+
+.key.bound:hover .key-edit,
+.key.bound:focus-within .key-edit {
+  opacity: 1;
+  translate: 0 3px;
+}

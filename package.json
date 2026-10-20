@@ -1,0 +1,14 @@
+{
+  "name": "keyboard-start-page",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test 'tests/unit/*.test.js' && playwright test",
+    "test:unit": "node --test 'tests/unit/*.test.js'",
+    "test:e2e": "playwright test",
+    "package": "scripts/package.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
+  }
+}

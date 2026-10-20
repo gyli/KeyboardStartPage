@@ -6,17 +6,20 @@
   <title>New Tab</title>
   <script src="src/boot.js"></script>
   <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/keyboard.css">
   <link rel="stylesheet" href="styles/newtab.css">
   <script type="module" src="src/newtab.js"></script>
 </head>
 <body>
+  <div id="wallpaper" class="wallpaper"></div>
+
   <main>
     <div id="keyboard" class="keyboard" aria-label="Keyboard shortcuts"></div>
   </main>
 
   <footer class="footer">
     <p id="hint" class="hint" hidden>
-      Press a key to open its site. Click an empty key to add one.
+      Press a key to open its site. Click an empty key, or drop a link on it, to add one.
       <span id="focus-hint">If keys don't respond, press <kbd>Tab</kbd> first.</span>
     </p>
     <button id="open-settings" class="icon-button" type="button" title="Settings" aria-label="Settings">
@@ -25,33 +28,5 @@
   </footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-  <dialog id="editor" class="dialog">
-    <form method="dialog">
-      <h2>Link for <kbd id="editor-key"></kbd></h2>
-      <label for="editor-url">Website address</label>
-      <input id="editor-url" type="text" inputmode="url" placeholder="example.com" autocomplete="off" spellcheck="false">
-      <p id="editor-error" class="error" role="alert"></p>
-      <div class="dialog-actions">
-        <button id="editor-remove" class="button danger" type="button">Remove</button>
-        <span class="spacer"></span>
-        <button class="button" value="cancel" formnovalidate>Cancel</button>
-        <button class="button primary" value="save">Save</button>
-      </div>
-    </form>
-  </dialog>
-
-  <template id="key-template">
-    <div class="key">
-      <a class="key-cap">
-        <span class="key-label"></span>
-        <img class="key-icon" alt="" hidden>
-        <span class="key-site"></span>
-      </a>
-      <button class="key-edit" type="button" tabindex="-1" aria-label="Edit link">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>
-      </button>
-    </div>
-  </template>
 </body>
 </html>

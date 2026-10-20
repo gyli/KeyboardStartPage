@@ -140,9 +140,14 @@ input[role="switch"] {
   & .empty { color: var(--muted); font-size: 14px; }
 }
 
-.icon-button.small {
-  width: 28px;
-  height: 28px;
+.wallpaper-preview {
+  width: 56px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: center / cover no-repeat;
+}
 
-  & svg { width: 16px; height: 16px; }
+.links strong {
+  font-weight: 600;
 }

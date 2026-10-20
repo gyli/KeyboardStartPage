@@ -1,0 +1,28 @@
+/* Chrome limits popups to 800 x 600. */
+body {
+  min-height: 0;
+  padding: 20px 20px 8px;
+}
+
+.keyboard {
+  --key-width: 46px;
+}
+
+/* Room for the editor dialog, which is taller than the keyboard. */
+body:has(.dialog[open]) {
+  min-height: 360px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}

@@ -10,10 +10,11 @@ Get it from the [Chrome Web Store](https://chromewebstore.google.com/detail/keyb
 
 ## Use
 
-- **Add a link:** click an empty key and type the address.
+- **Add a link:** click an empty key and type the address, or drag a link (from a page, the address bar or the bookmarks bar) onto a key. You can give a key an optional name, shown when you hover it.
 - **Change or remove a link:** hover a key and click the pencil.
 - **Open a link:** press the key, or click it.
-- **Settings:** click the gear in the bottom right corner.
+- **Quick launcher:** click the extension's toolbar icon, or set a shortcut on `chrome://extensions/shortcuts`, to open the keyboard on any page. Pressing an empty key there offers to add the page you're on.
+- **Wallpaper, theme and more:** click the gear in the bottom right corner.
 
 Chrome puts the cursor in the address bar on every new tab. Press <kbd>Tab</kbd> or click the page before pressing a key, or turn on **Focus the page on new tabs** in settings.
 
@@ -30,13 +31,22 @@ There is no build step and there are no dependencies.
 2. After editing files, click the reload icon on the extension card and open a new tab.
 3. Run `scripts/package.sh` to build the Web Store zip in `dist/`.
 
+### Tests
+
+Run `npm install` once, then `npm test`. Unit tests (`tests/unit`) use Node's built-in test runner. End-to-end tests (`tests/e2e`) load the extension into Chromium with Playwright. If Playwright asks for a browser, run `npx playwright install chromium`.
+
 | Path | What it is |
 |---|---|
 | `newtab.html`, `src/newtab.js` | The new tab page |
+| `popup.html`, `src/popup.js` | The quick launcher popup |
 | `options.html`, `src/options.js` | The settings page |
-| `src/storage.js` | Settings: defaults, loading, saving, migration, backup |
+| `src/keyboard.js`, `styles/keyboard.css` | The keyboard, shared by the new tab page and the popup |
+| `src/editor.js` | The edit link dialog |
+| `src/open.js` | Opens links in the chosen tab or window |
+| `src/storage.js` | Settings: defaults, loading, saving, migration, backup, wallpaper |
 | `src/url.js` | URL cleanup and display helpers |
 | `src/theme.js`, `src/boot.js` | Theme handling |
+| `service-worker.js` | Caches site icons |
 | `styles/base.css` | Colors and shared controls for light and dark mode |
 
 Settings are stored in `chrome.storage.sync` with the same key names as v0.4 (`li_<key>`, `Click`, `bgColor`, ...), so updating keeps existing users' links.

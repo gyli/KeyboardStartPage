@@ -1,13 +1,14 @@
 import {
   DEFAULT_PREFERENCES, KEYS, OPEN_MODES, TRIGGERS,
-  exportBackup, importBackup, loadSettings, onSettingsChanged,
-  setLink, setPreference, setShortcut,
+  exportBackup, importBackup, loadSettings, loadWallpaper, onSettingsChanged,
+  onWallpaperChanged, setLink, setPreference, setShortcut, setWallpaper,
 } from './storage.js';
 import { faviconUrl } from './url.js';
 import { applyTheme } from './theme.js';
 
 const $ = (id) => document.getElementById(id);
 const toast = $('toast');
+const MAX_WALLPAPER_SIZE = 2560;
 
 // The color picker needs a hex value, so read the theme background back from the page.
 function themeBackgroundHex() {
@@ -31,7 +32,7 @@ function buildShortcuts() {
   }
 }
 
-function renderLinks(links) {
+function renderLinks(links, names) {
   const list = $('links');
   list.replaceChildren();
   const bound = [...KEYS].filter((key) => links[key]);
@@ -58,8 +59,13 @@ function renderLinks(links) {
 
     const url = document.createElement('a');
     url.href = links[key];
-    url.textContent = links[key];
     url.target = '_blank';
+    if (names[key]) {
+      const name = document.createElement('strong');
+      name.textContent = names[key];
+      url.append(name, ' ');
+    }
+    url.append(links[key]);
 
     const remove = document.createElement('button');
     remove.className = 'icon-button small';
@@ -84,7 +90,47 @@ function render(settings) {
   for (const select of document.querySelectorAll('#shortcuts select')) {
     select.value = settings.shortcuts[select.dataset.trigger];
   }
-  renderLinks(settings.links);
+  renderLinks(settings.links, settings.names);
+}
+
+function renderWallpaper(dataUrl) {
+  $('wallpaper-preview').hidden = !dataUrl;
+  $('wallpaper-preview').style.backgroundImage = dataUrl ? `url("${dataUrl}")` : '';
+  $('wallpaper-remove').disabled = !dataUrl;
+}
+
+// Scales the image down and re-encodes it as JPEG, so even large photos stay
+// well under chrome.storage.local's 10 MB limit.
+async function compressImage(file) {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_WALLPAPER_SIZE / Math.max(bitmap.width, bitmap.height));
+  const canvas = new OffscreenCanvas(Math.round(bitmap.width * scale), Math.round(bitmap.height * scale));
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.85 });
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function chooseWallpaper(file) {
+  try {
+    await setWallpaper(await compressImage(file));
+    showToast('Wallpaper saved');
+  } catch {
+    showToast('Couldn’t use this image. Try a JPEG or PNG file.');
+  }
+}
+
+// Chrome only lets users set extension shortcuts on its own shortcuts page.
+async function renderLauncherShortcut() {
+  const commands = await chrome.commands.getAll();
+  const shortcut = commands.find((command) => command.name === '_execute_action')?.shortcut;
+  $('launcher-shortcut').textContent = shortcut
+    ? `Currently ${shortcut}. To turn it off, remove it on Chrome's shortcuts page.`
+    : 'Not set. Choose one on Chrome\'s shortcuts page to turn this on.';
 }
 
 let toastTimer;
@@ -124,7 +170,12 @@ async function restoreBackup(file) {
 
 buildShortcuts();
 render(await loadSettings());
+renderWallpaper(await loadWallpaper());
+renderLauncherShortcut();
 onSettingsChanged(render);
+onWallpaperChanged(renderWallpaper);
+// Pick up shortcut changes when the user comes back from Chrome's shortcuts page.
+window.addEventListener('focus', renderLauncherShortcut);
 
 for (const radio of document.querySelectorAll('input[name="theme"]')) {
   radio.addEventListener('change', () => save(setPreference('theme', radio.value)));
@@ -133,6 +184,14 @@ $('bg-color').addEventListener('change', (event) => save(setPreference('bgColor'
 $('bg-reset').addEventListener('click', () => save(setPreference('bgColor', DEFAULT_PREFERENCES.bgColor)));
 $('show-hints').addEventListener('change', (event) => save(setPreference('showHints', event.target.checked)));
 $('focus-page').addEventListener('change', (event) => save(setPreference('focusPage', event.target.checked)));
+$('launcher-change').addEventListener('click', () => chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }));
+$('wallpaper-choose').addEventListener('click', () => $('wallpaper-file').click());
+$('wallpaper-file').addEventListener('change', (event) => {
+  const [file] = event.target.files;
+  if (file) chooseWallpaper(file);
+  event.target.value = '';
+});
+$('wallpaper-remove').addEventListener('click', () => save(setWallpaper(null), 'Wallpaper removed'));
 $('export').addEventListener('click', downloadBackup);
 $('import-button').addEventListener('click', () => $('import').click());
 $('import').addEventListener('change', (event) => {

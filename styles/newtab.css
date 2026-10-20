@@ -1,0 +1,167 @@
+body {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  user-select: none;
+}
+
+main {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+/* Rows are offset like a real keyboard. Units are in key widths (--u). */
+.keyboard {
+  --key: clamp(48px, 6.5vw, 80px);
+  --gap: clamp(6px, 0.8vw, 12px);
+  --u: calc(var(--key) + var(--gap));
+
+  display: grid;
+  gap: var(--gap);
+  width: calc(10.5 * var(--u));
+}
+
+.row {
+  display: flex;
+  gap: var(--gap);
+
+  &[data-row="1"] { padding-left: calc(0.5 * var(--u)); }
+  &[data-row="2"] { padding-left: calc(0.75 * var(--u)); }
+  &[data-row="3"] { padding-left: calc(1.25 * var(--u)); }
+}
+
+.key {
+  position: relative;
+  width: var(--key);
+  aspect-ratio: 1;
+}
+
+.key-cap {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+  box-shadow: 0 2px 0 var(--border), 0 4px 12px var(--shadow);
+  font-family: var(--font);
+  cursor: pointer;
+  transition: translate 0.08s, box-shadow 0.08s, background 0.15s;
+
+  &:hover { background: var(--surface-hover); }
+}
+
+.key-label {
+  justify-self: start;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.key-icon {
+  align-self: center;
+  width: 40%;
+  height: 40%;
+  border-radius: 6px;
+}
+
+.key-site {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Empty keys: letter in the middle, a "+" on hover. */
+.key:not(.bound) {
+  & .key-cap { opacity: 0.7; box-shadow: 0 2px 0 var(--border); }
+  & .key-label { grid-row: 1 / -1; align-self: center; justify-self: center; font-size: 16px; font-weight: 500; }
+  & .key-cap:hover { opacity: 1; }
+  & .key-cap:hover .key-label { font-size: 0; }
+  & .key-cap:hover .key-label::after { content: "+"; font-size: 22px; font-weight: 300; }
+  & .key-edit { display: none; }
+}
+
+.key.bound .key-label { color: var(--text); }
+
+.key.pressed .key-cap,
+.key-cap:active {
+  translate: 0 2px;
+  box-shadow: 0 0 0 var(--border), 0 1px 3px var(--shadow);
+  border-color: var(--accent);
+}
+
+.key-edit {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  & svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  &:hover { background: color-mix(in srgb, var(--text) 10%, transparent); color: var(--text); }
+}
+
+.key:hover .key-edit,
+.key:focus-within .key-edit { opacity: 1; }
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 24px;
+  position: relative;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+#open-settings {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+}
+
+.dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 64px var(--shadow);
+
+  &::backdrop { background: rgb(0 0 0 / 0.35); backdrop-filter: blur(2px); }
+  & h2 { margin: 0 0 16px; font-size: 18px; font-weight: 600; }
+  & label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 13px; }
+  & .error { min-height: 1.5em; margin: 6px 0 12px; color: var(--danger); font-size: 13px; }
+  & .error:empty { visibility: hidden; }
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 8px;
+
+  & .spacer { flex: 1; }
+}

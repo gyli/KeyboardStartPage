@@ -1,7 +1,7 @@
 import {
   DEFAULT_PREFERENCES, KEYS, OPEN_MODES, TRIGGERS,
   exportBackup, importBackup, loadSettings, onSettingsChanged,
-  resetShortcuts, setLink, setPreference, setShortcut,
+  setLink, setPreference, setShortcut,
 } from './storage.js';
 import { faviconUrl } from './url.js';
 import { applyTheme } from './theme.js';
@@ -133,7 +133,6 @@ $('bg-color').addEventListener('change', (event) => save(setPreference('bgColor'
 $('bg-reset').addEventListener('click', () => save(setPreference('bgColor', DEFAULT_PREFERENCES.bgColor)));
 $('show-hints').addEventListener('change', (event) => save(setPreference('showHints', event.target.checked)));
 $('focus-page').addEventListener('change', (event) => save(setPreference('focusPage', event.target.checked)));
-$('shortcuts-reset').addEventListener('click', () => save(resetShortcuts(), 'Shortcuts reset'));
 $('export').addEventListener('click', downloadBackup);
 $('import-button').addEventListener('click', () => $('import').click());
 $('import').addEventListener('change', (event) => {

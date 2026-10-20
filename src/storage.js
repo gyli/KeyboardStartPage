@@ -12,30 +12,22 @@ export const OPEN_MODES = {
   active: 'In a new tab',
   inactive: 'In a new background tab',
   window: 'In a new window',
-  none: 'Do nothing',
 };
 
+// Only keyboard shortcuts are configurable. Keys are real links, so Chrome
+// handles clicks (Ctrl/⌘, Shift, middle click) the same way as on any website.
 export const TRIGGERS = {
-  Key: 'Press key',
+  Key: 'Press a key',
   ShiftKey: 'Shift + key',
-  Click: 'Click',
-  MiddleClick: 'Middle click',
-  CtrlClick: 'Ctrl/⌘ + click',
-  ShiftClick: 'Shift + click',
-  CtrlShiftClick: 'Ctrl/⌘ + Shift + click',
-  ShiftMiddleClick: 'Shift + middle click',
 };
 
 export const DEFAULT_SHORTCUTS = {
   Key: 'same',
   ShiftKey: 'inactive',
-  Click: 'same',
-  MiddleClick: 'inactive',
-  CtrlClick: 'inactive',
-  ShiftClick: 'window',
-  CtrlShiftClick: 'active',
-  ShiftMiddleClick: 'active',
 };
+
+// Click settings from v0.4 that Chrome now handles natively.
+const LEGACY_CLICK_SETTINGS = ['Click', 'MiddleClick', 'CtrlClick', 'ShiftClick', 'CtrlShiftClick', 'ShiftMiddleClick'];
 
 export const DEFAULT_PREFERENCES = {
   theme: 'system', // 'system' | 'light' | 'dark'
@@ -90,7 +82,9 @@ async function migrate(raw) {
 
   const stale = [];
   if (typeof raw.bgColor === 'string' && raw.bgColor.toLowerCase() === LEGACY_DEFAULT_BG) stale.push('bgColor');
-  if ('defaultActions' in raw) stale.push('defaultActions');
+  for (const name of ['defaultActions', ...LEGACY_CLICK_SETTINGS]) {
+    if (name in raw) stale.push(name);
+  }
   if (stale.length) {
     await store.remove(stale);
     for (const name of stale) delete raw[name];
@@ -115,10 +109,6 @@ export function setLink(key, url) {
 
 export function setShortcut(trigger, mode) {
   return store.set({ [trigger]: mode });
-}
-
-export function resetShortcuts() {
-  return store.set(DEFAULT_SHORTCUTS);
 }
 
 export function setPreference(name, value) {

@@ -1,5 +1,5 @@
 import { KEY_ROWS, loadSettings, onSettingsChanged, setLink } from './storage.js';
-import { faviconUrl, normalizeUrl, siteName } from './url.js';
+import { faviconUrl, isWebUrl, normalizeUrl, siteName } from './url.js';
 import { applyTheme } from './theme.js';
 
 const keyboard = document.getElementById('keyboard');
@@ -14,13 +14,15 @@ const toast = document.getElementById('toast');
 const keyElements = new Map();
 let settings;
 
-// Chrome always focuses the address bar on a new tab page. Reloading the page
-// through the tabs API moves focus to the page, at the cost of showing the
-// extension URL in the address bar. It's opt-in for that reason.
+// Chrome always focuses the address bar on a new tab page, and nothing on the
+// page can take focus back. A tab opened through the tabs API focuses its page
+// instead, so we replace this tab with one. Reloading the same tab is not enough.
+// The address bar then shows the extension URL, so this is opt-in.
 async function maybeTakeFocus() {
   if (!settings.focusPage || location.search.includes('focus')) return false;
   const tab = await chrome.tabs.getCurrent();
-  await chrome.tabs.update(tab.id, { url: chrome.runtime.getURL('newtab.html?focus') });
+  await chrome.tabs.create({ url: chrome.runtime.getURL('newtab.html?focus'), index: tab.index, windowId: tab.windowId });
+  await chrome.tabs.remove(tab.id);
   return true;
 }
 
@@ -53,8 +55,19 @@ function render() {
 
     element.classList.toggle('bound', Boolean(url));
     element.querySelector('.key-site').textContent = url ? siteName(url) : '';
-    cap.title = url ?? `Add a link for ${key.toUpperCase()}`;
     cap.setAttribute('aria-label', url ? `${key.toUpperCase()}: ${siteName(url)}` : `${key.toUpperCase()}: add a link`);
+    if (url) {
+      // Chrome shows the URL in its status bubble on hover, so no title is needed.
+      cap.href = url;
+      cap.removeAttribute('role');
+      cap.removeAttribute('tabindex');
+      cap.removeAttribute('title');
+    } else {
+      cap.removeAttribute('href');
+      cap.setAttribute('role', 'button');
+      cap.setAttribute('tabindex', '0');
+      cap.title = `Add a link for ${key.toUpperCase()}`;
+    }
     if (icon.getAttribute('src') !== iconSrc) {
       icon.hidden = true;
       if (iconSrc) icon.src = iconSrc;
@@ -86,15 +99,6 @@ function activate(key, trigger) {
   else showToast(`${key.toUpperCase()} has no link yet. Click the key to add one.`);
 }
 
-function clickTrigger(event) {
-  const modifier = event.ctrlKey || event.metaKey;
-  if (event.button === 1) return event.shiftKey ? 'ShiftMiddleClick' : 'MiddleClick';
-  if (modifier && event.shiftKey) return 'CtrlShiftClick';
-  if (modifier) return 'CtrlClick';
-  if (event.shiftKey) return 'ShiftClick';
-  return 'Click';
-}
-
 // Prefer the typed character so non-QWERTY layouts open the key they see printed.
 // Fall back to the physical key for layouts without Latin letters, and for Shift + digit.
 function keyFromEvent(event) {
@@ -104,17 +108,32 @@ function keyFromEvent(event) {
   return match ? (match[1] ?? match[2]).toLowerCase() : null;
 }
 
+// Keys with a web link are plain <a> elements, so Chrome handles clicks itself.
+// Only empty keys, the edit button and non-web links need handling here.
 function handleKeyboardClick(event) {
   const element = event.target.closest('.key');
   if (!element) return;
   const { key } = element.dataset;
+  const url = settings.links[key];
 
-  if (event.target.closest('.key-edit') || !settings.links[key]) {
+  if (event.target.closest('.key-edit') || !url) {
+    event.preventDefault();
     if (event.button === 0) openEditor(key);
     return;
   }
+  if (!isWebUrl(url)) {
+    event.preventDefault();
+    const newTab = event.button === 1 || event.ctrlKey || event.metaKey;
+    openLink(url, newTab ? 'inactive' : event.shiftKey ? 'window' : 'same');
+  }
+}
+
+// Enter or Space on a focused empty key opens the editor, like a button.
+function handleKeyboardKeydown(event) {
+  const cap = event.target.closest('.key-cap[role="button"]');
+  if (!cap || (event.key !== 'Enter' && event.key !== ' ')) return;
   event.preventDefault();
-  activate(key, clickTrigger(event));
+  openEditor(cap.parentElement.dataset.key);
 }
 
 function handleKeydown(event) {
@@ -162,8 +181,7 @@ if (!(await maybeTakeFocus())) {
 
   keyboard.addEventListener('click', handleKeyboardClick);
   keyboard.addEventListener('auxclick', handleKeyboardClick);
-  // Stop middle click from starting autoscroll.
-  keyboard.addEventListener('mousedown', (event) => event.button === 1 && event.preventDefault());
+  keyboard.addEventListener('keydown', handleKeyboardKeydown);
   // Favicons stay hidden until they load, so a failed request shows nothing instead of a broken image.
   keyboard.addEventListener('load', (event) => { event.target.hidden = false; }, true);
   document.addEventListener('keydown', handleKeydown);

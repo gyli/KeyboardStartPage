@@ -38,6 +38,16 @@ export function faviconUrl(href) {
   }
 }
 
+// Extension pages can follow links to http(s) pages, but Chrome blocks links to
+// chrome://, file:// and similar pages.
+export function isWebUrl(href) {
+  try {
+    return isWeb(new URL(href));
+  } catch {
+    return false;
+  }
+}
+
 function isWeb(url) {
   return url.protocol === 'http:' || url.protocol === 'https:';
 }

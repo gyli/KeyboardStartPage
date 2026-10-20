@@ -49,6 +49,7 @@ main {
   color: var(--muted);
   box-shadow: 0 2px 0 var(--border), 0 4px 12px var(--shadow);
   font-family: var(--font);
+  text-decoration: none;
   cursor: pointer;
   transition: translate 0.08s, box-shadow 0.08s, background 0.15s;
 

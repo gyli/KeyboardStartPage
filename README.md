@@ -17,16 +17,10 @@ Get it from the [Chrome Web Store](https://chromewebstore.google.com/detail/keyb
 
 Chrome puts the cursor in the address bar on every new tab. Press <kbd>Tab</kbd> or click the page before pressing a key, or turn on **Focus the page on new tabs** in settings.
 
-### Default shortcuts
+### Opening links
 
-Every shortcut can be changed in settings.
-
-| Action | Opens the link |
-|---|---|
-| Press key, or click | In the same tab |
-| <kbd>Shift</kbd> + key, Ctrl/⌘ + click, or middle click | In a new background tab |
-| Ctrl/⌘ + <kbd>Shift</kbd> + click, or <kbd>Shift</kbd> + middle click | In a new tab |
-| <kbd>Shift</kbd> + click | In a new window |
+- **Keyboard:** a key opens its link in the same tab, and <kbd>Shift</kbd> + key opens it in a new background tab. Both can be changed in settings.
+- **Mouse:** keys are normal links, so Chrome's usual shortcuts work: Ctrl/⌘ + click or middle click opens a background tab, Ctrl/⌘ + <kbd>Shift</kbd> + click opens a new tab, and <kbd>Shift</kbd> + click opens a new window. Right-click for more options.
 
 ## Development
 

@@ -29,15 +29,6 @@ main {
   & h2 { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
 }
 
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-
-  & h2 { margin: 0; }
-}
-
 .field {
   display: flex;
   align-items: center;
@@ -124,6 +115,7 @@ input[role="switch"] {
 .shortcuts {
   display: grid;
   gap: 8px;
+  margin-bottom: 12px;
 }
 
 .shortcut {

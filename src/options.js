@@ -1,9 +1,9 @@
 import {
   DEFAULT_PREFERENCES, KEYS, OPEN_MODES, TRIGGERS,
   exportBackup, importBackup, loadSettings, loadWallpaper, onSettingsChanged,
-  onWallpaperChanged, setLink, setPreference, setShortcut, setWallpaper,
+  onWallpaperChanged, setPreference, setShortcut, setWallpaper,
 } from './storage.js';
-import { faviconUrl } from './url.js';
+import { createLinksEditor } from './links-editor.js';
 import { applyTheme } from './theme.js';
 
 const $ = (id) => document.getElementById(id);
@@ -31,55 +31,6 @@ function buildShortcuts() {
   }
 }
 
-function renderLinks(links, names) {
-  const list = $('links');
-  list.replaceChildren();
-  const bound = [...KEYS].filter((key) => links[key]);
-  if (!bound.length) {
-    const empty = document.createElement('li');
-    empty.className = 'empty';
-    empty.textContent = 'No links yet.';
-    list.append(empty);
-    return;
-  }
-
-  for (const key of bound) {
-    const item = document.createElement('li');
-
-    const kbd = document.createElement('kbd');
-    kbd.textContent = key.toUpperCase();
-
-    const icon = document.createElement('img');
-    icon.alt = '';
-    // Invisible until it loads, but it keeps its space so the rows line up.
-    icon.style.visibility = 'hidden';
-    icon.addEventListener('load', () => { icon.style.visibility = ''; });
-    const src = faviconUrl(links[key]);
-    if (src) icon.src = src;
-
-    const url = document.createElement('a');
-    url.href = links[key];
-    url.target = '_blank';
-    if (names[key]) {
-      const name = document.createElement('strong');
-      name.textContent = names[key];
-      url.append(name, ' ');
-    }
-    url.append(links[key]);
-
-    const remove = document.createElement('button');
-    remove.className = 'icon-button small';
-    remove.type = 'button';
-    remove.title = `Remove link for ${key.toUpperCase()}`;
-    remove.setAttribute('aria-label', remove.title);
-    remove.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
-    remove.addEventListener('click', () => save(setLink(key, null), 'Link removed'));
-
-    item.append(kbd, icon, url, remove);
-    list.append(item);
-  }
-}
-
 function render(settings) {
   applyTheme(settings);
   document.querySelector(`input[name="theme"][value="${settings.theme}"]`).checked = true;
@@ -90,7 +41,7 @@ function render(settings) {
   for (const select of document.querySelectorAll('#shortcuts select')) {
     select.value = settings.shortcuts[select.dataset.trigger];
   }
-  renderLinks(settings.links, settings.names);
+  linksEditor.update(settings);
   renderPrefix(settings);
 }
 
@@ -271,6 +222,10 @@ async function restoreBackup(file) {
 }
 
 // Event listeners are attached before anything is loaded, so early clicks aren't lost.
+const linksEditor = createLinksEditor({ showToast });
+window.addEventListener('beforeunload', (event) => {
+  if (linksEditor.hasUnsavedChanges()) event.preventDefault();
+});
 buildShortcuts();
 onSettingsChanged(render);
 onWallpaperChanged(renderWallpaper);

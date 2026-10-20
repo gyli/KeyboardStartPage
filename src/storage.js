@@ -121,6 +121,26 @@ export async function setLink(key, url, name = '') {
   await (trimmed ? store.set({ [nameId(key)]: trimmed }) : store.remove(nameId(key)));
 }
 
+// Applies many link changes in one write: { q: { url, name }, w: null, ... }.
+// null removes the key's link; an empty name removes its custom name.
+export async function saveLinks(changes) {
+  const set = {};
+  const remove = [];
+  for (const [key, link] of Object.entries(changes)) {
+    if (!KEYS.includes(key) || key.length !== 1) continue;
+    if (!link) {
+      remove.push(linkId(key), nameId(key));
+      continue;
+    }
+    set[linkId(key)] = link.url;
+    const name = (link.name ?? '').trim().slice(0, MAX_NAME_LENGTH);
+    if (name) set[nameId(key)] = name;
+    else remove.push(nameId(key));
+  }
+  if (remove.length) await store.remove(remove);
+  if (Object.keys(set).length) await store.set(set);
+}
+
 export function setShortcut(trigger, mode) {
   return store.set({ [trigger]: mode });
 }

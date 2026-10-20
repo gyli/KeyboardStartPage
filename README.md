@@ -15,6 +15,7 @@ Get it from the [Chrome Web Store](https://chromewebstore.google.com/detail/keyb
 - **Open a link:** press the key, or click it.
 - **Open links from any page:** turn on "Use a shortcut on websites" in settings (Chrome asks once for access to websites), then record a prefix: click Record, hold the keys together, and let go. The prefix needs Ctrl/⌃, Alt/⌥ or ⌘/Win, plus up to 3 other keys. While the prefix is held, tap a key to open its link, e.g. hold ⌥ and press G, or hold ⌃ + X + P and press G. Choose whether these links open in the same tab, a new tab, a background tab or a new window. It doesn't work on Chrome's own pages or the Chrome Web Store.
 - **Toolbar popup:** click the extension's icon to open the keyboard over any page. Pressing an empty key there offers to add the page you're on.
+- **Edit many links at once:** in settings, "Your links" lets you change names and addresses, add links, and remove several at once, then save them together.
 - **Wallpaper, theme and more:** click the gear in the bottom right corner.
 
 Chrome puts the cursor in the address bar on every new tab. Press <kbd>Tab</kbd> or click the page before pressing a key, or turn on **Focus the page on new tabs** in settings.
@@ -43,6 +44,7 @@ Run `npm install` once, then `npm test`. Unit tests (`tests/unit`) use Node's bu
 | `options.html`, `src/options.js` | The settings page |
 | `src/keyboard.js`, `styles/keyboard.css` | The keyboard, shared by the new tab page and the popup |
 | `src/editor.js` | The edit link dialog |
+| `src/links-editor.js` | "Your links" in settings: edit, add and remove many links at once |
 | `src/open.js` | Opens links in the chosen tab or window |
 | `src/prefix-shortcut.js` | Prefix format and the held-keys listener, shared by web pages, the new tab page and settings |
 | `src/page-shortcuts.js` | Prefix shortcuts on web pages |

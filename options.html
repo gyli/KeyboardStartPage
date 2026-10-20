@@ -15,7 +15,7 @@
     <img src="icons/icon-128.png" alt="" width="40" height="40">
     <div>
       <h1>Keyboard Start Page</h1>
-      <p>Changes are saved automatically.</p>
+      <p>Changes are saved automatically, except in Your links.</p>
     </div>
   </header>
 
@@ -77,17 +77,23 @@
 
     <section class="card">
       <h2>Your links</h2>
-      <p class="description">To add or change a link, click a key on the new tab page, or drop a link on it.</p>
+      <p class="description">Edit, add or remove several links, then save them together.</p>
+      <div class="links-toolbar">
+        <label class="select-all"><input id="links-select-all" type="checkbox"> Select all</label>
+        <button id="links-remove-selected" class="button danger" type="button" disabled>Remove selected</button>
+      </div>
       <ul id="links" class="links"></ul>
-    </section>
-
-    <section class="card">
-      <h2>Backup</h2>
-      <p class="description">Save your links and settings to a file, or restore them from one. Restoring replaces everything.</p>
-      <div class="inline">
-        <button id="export" class="button" type="button">Export</button>
-        <button id="import-button" class="button" type="button">Import</button>
-        <input id="import" type="file" accept="application/json,.json" hidden>
+      <div class="links-add">
+        <select id="add-key" aria-label="Key"></select>
+        <input id="add-name" type="text" placeholder="Name" aria-label="Name for the new link" maxlength="30">
+        <input id="add-url" type="text" placeholder="example.com" aria-label="Address for the new link" spellcheck="false">
+        <button id="add-link" class="button" type="button">Add</button>
+      </div>
+      <div id="links-actions" class="links-actions" hidden>
+        <span id="links-changes"></span>
+        <span class="spacer"></span>
+        <button id="links-discard" class="button" type="button">Discard</button>
+        <button id="links-save" class="button primary" type="button">Save changes</button>
       </div>
     </section>
 
@@ -112,6 +118,16 @@
         <span class="field-label">Open links</span>
         <select id="prefix-open-mode" class="open-mode-select"></select>
       </label>
+    </section>
+
+    <section class="card">
+      <h2>Backup</h2>
+      <p class="description">Save your links and settings to a file, or restore them from one. Restoring replaces everything.</p>
+      <div class="inline">
+        <button id="export" class="button" type="button">Export</button>
+        <button id="import-button" class="button" type="button">Import</button>
+        <input id="import" type="file" accept="application/json,.json" hidden>
+      </div>
     </section>
   </main>
 

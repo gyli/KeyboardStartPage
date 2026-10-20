@@ -28,7 +28,7 @@ test('settings show saved values and save changes', async ({ seed, open }) => {
   const page = await open('options.html');
 
   await expect(page.locator('select[data-trigger="ShiftKey"]')).toHaveValue('window');
-  await expect(page.locator('#links li')).toHaveText(/Example/);
+  await expect(page.getByLabel('Name for E')).toHaveValue('Example');
 
   await page.locator('select[data-trigger="Key"]').selectOption('active');
   await page.getByRole('switch', { name: /Show hints/ }).uncheck();

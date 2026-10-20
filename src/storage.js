@@ -36,6 +36,7 @@ export const DEFAULT_PREFERENCES = {
   focusPage: false,
   showHints: true,
   pageShortcuts: false, // "Open links from any page" is on
+  prefixOpenMode: 'same', // where those links open: one of OPEN_MODES
   shortcutPrefix: 'Alt', // see src/prefix-shortcut.js for the format
 };
 
@@ -74,6 +75,7 @@ function parse(raw) {
   for (const [name, value] of Object.entries(DEFAULT_PREFERENCES)) {
     preferences[name] = raw[name] ?? value;
   }
+  if (!(preferences.prefixOpenMode in OPEN_MODES)) preferences.prefixOpenMode = DEFAULT_PREFERENCES.prefixOpenMode;
 
   return { links, names, shortcuts, ...preferences };
 }
@@ -191,6 +193,7 @@ export async function importBackup(backup) {
   }
   const preferences = backup.preferences ?? {};
   if (['system', 'light', 'dark'].includes(preferences.theme)) raw.theme = preferences.theme;
+  if (preferences.prefixOpenMode in OPEN_MODES) raw.prefixOpenMode = preferences.prefixOpenMode;
   if (/^#[\da-f]{6}$/i.test(preferences.bgColor)) raw.bgColor = preferences.bgColor;
   // Same rule as parse() in prefix-shortcut.js: key codes joined by "+", with Ctrl, Alt or Meta.
   if (/^(?=.*\b(Ctrl|Alt|Meta)\b)[A-Za-z0-9+]+$/.test(preferences.shortcutPrefix)) raw.shortcutPrefix = preferences.shortcutPrefix;

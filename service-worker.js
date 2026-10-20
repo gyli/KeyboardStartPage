@@ -52,18 +52,18 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'sync' && 'pageShortcuts' in changes) queuePageScriptUpdate();
 });
 
-// Opens a key's link from a web page, the same way pressing the key on the
-// new tab page would. New tabs open next to the page.
+// Opens a key's link from a web page, where the user chose in settings.
+// New tabs open next to the page.
 async function openKey(key, tab) {
   const settings = await loadSettings();
   const url = settings.links[key];
   if (!url) return;
-  switch (settings.shortcuts.Key) {
+  switch (settings.prefixOpenMode) {
     case 'same':
       return chrome.tabs.update(tab.id, { url });
     case 'active':
     case 'inactive':
-      return chrome.tabs.create({ url, active: settings.shortcuts.Key === 'active', index: tab.index + 1, windowId: tab.windowId });
+      return chrome.tabs.create({ url, active: settings.prefixOpenMode === 'active', index: tab.index + 1, windowId: tab.windowId });
     case 'window':
       return chrome.windows.create({ url });
   }

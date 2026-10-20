@@ -54,10 +54,10 @@ async function handleDropUrl(key, url) {
   }
 }
 
-function openKey(key, trigger) {
+function openKey(key, mode) {
   keyboard.flash(key);
   const url = settings.links[key];
-  if (url) openLink(url, settings.shortcuts[trigger]);
+  if (url) openLink(url, mode);
   else showToast(`${key.toUpperCase()} has no link yet. Click the key to add one.`);
 }
 
@@ -66,7 +66,7 @@ function handleKeydown(event) {
   const key = keyFromEvent(event);
   if (!key) return;
   event.preventDefault();
-  openKey(key, event.shiftKey ? 'ShiftKey' : 'Key');
+  openKey(key, settings.shortcuts[event.shiftKey ? 'ShiftKey' : 'Key']);
 }
 
 let toastTimer;
@@ -90,7 +90,7 @@ const editor = createEditor();
 prefixShortcut.listen({
   getPrefix: () => (settings.pageShortcuts && !editor.isOpen ? settings.shortcutPrefix : null),
   isBound: (key) => Boolean(settings.links[key]),
-  onOpen: (key) => openKey(key, 'Key'),
+  onOpen: (key) => openKey(key, settings.prefixOpenMode),
 });
 
 if (!(await maybeTakeFocus())) {

@@ -170,6 +170,17 @@ test('the prefix is recorded by holding keys together', async ({ seed, open }) =
   await expect(page.locator('#prefix-note')).toHaveText(/X and P won't type/);
 });
 
+test('where prefix shortcut links open is saved', async ({ seed, open }) => {
+  await seed({});
+  const page = await open('options.html');
+  const select = page.getByLabel('Open links');
+  await expect(select).toHaveValue('same');
+  await select.selectOption('active');
+  await expect.poll(async () => (await storage(page)).prefixOpenMode).toBe('active');
+  await page.reload();
+  await expect(page.getByLabel('Open links')).toHaveValue('active');
+});
+
 test('a prefix without Control, Option or Command is rejected', async ({ seed, open }) => {
   await seed({});
   const page = await open('options.html');
@@ -243,6 +254,27 @@ test.describe('with access to websites', () => {
     await expect.poll(() => serviceWorker.evaluate(async () =>
       (await chrome.scripting.getRegisteredContentScripts()).map((script) => [script.id, script.js])))
       .toEqual([['page-shortcuts', ['src/prefix-shortcut.js', 'src/page-shortcuts.js']]]);
+  });
+
+  test('a prefix shortcut can open the link in a new tab next to the page', async ({ context, serviceWorker, site, seed }) => {
+    await seed({ li_e: `${site}target`, pageShortcuts: true, shortcutPrefix: 'Alt', prefixOpenMode: 'active' });
+    await expect.poll(() => registeredScripts(serviceWorker)).toEqual(['page-shortcuts']);
+    const page = await context.newPage();
+    await page.goto(`${site}start`);
+
+    const newTab = context.waitForEvent('page');
+    await expect(async () => {
+      await page.keyboard.press('Alt+E');
+      await newTab;
+    }).toPass({ timeout: 5000 });
+    await expect(await newTab).toHaveURL(`${site}target`);
+    await expect(page).toHaveURL(`${site}start`);
+    // Opened right after the page, not at the end of the tab strip.
+    const [pageTab, openedTab] = await serviceWorker.evaluate(async (urls) => {
+      const tabs = await chrome.tabs.query({});
+      return urls.map((url) => tabs.find((tab) => tab.url === url).index);
+    }, [`${site}start`, `${site}target`]);
+    expect(openedTab).toBe(pageTab + 1);
   });
 
   test('holding Ctrl + X + P and tapping a key opens its link from a web page', async ({ context, serviceWorker, site, seed }) => {

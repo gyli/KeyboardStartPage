@@ -183,3 +183,7 @@ input[role="switch"] {
   & .plus { color: var(--muted); }
   &.recording { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
 }
+
+.open-mode-select {
+  width: 240px;
+}

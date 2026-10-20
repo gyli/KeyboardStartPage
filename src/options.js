@@ -138,7 +138,8 @@ function renderKeycaps(labels) {
   });
 }
 
-function renderPrefix({ pageShortcuts, shortcutPrefix, links }) {
+function renderPrefix({ pageShortcuts, shortcutPrefix, prefixOpenMode, links }) {
+  $('prefix-open-mode').value = prefixOpenMode;
   currentPrefix = prefixShortcut.parse(shortcutPrefix) ? shortcutPrefix : DEFAULT_PREFERENCES.shortcutPrefix;
   exampleKey = ([...KEYS].find((key) => links[key]) ?? 'g').toUpperCase();
   renderPageShortcutsSwitch(pageShortcuts);
@@ -273,6 +274,8 @@ buildShortcuts();
 onSettingsChanged(render);
 onWallpaperChanged(renderWallpaper);
 $('page-shortcuts').addEventListener('change', changePageShortcuts);
+for (const [mode, text] of Object.entries(OPEN_MODES)) $('prefix-open-mode').add(new Option(text, mode));
+$('prefix-open-mode').addEventListener('change', (event) => save(setPreference('prefixOpenMode', event.target.value)));
 // Access may have changed on chrome://extensions while this page was in the background.
 window.addEventListener('focus', () => !recording && loadSettings().then(render));
 $('prefix-record').addEventListener('click', () => (recording ? stopRecording() : startRecording()));

@@ -49,8 +49,10 @@ test('a user who removed every link does not get starter links again', async () 
 });
 
 test('invalid shortcut values fall back to defaults', async () => {
-  areas.sync = { default: 'passed', Key: 'none', ShiftKey: 'bogus' };
-  assert.deepEqual((await storage.loadSettings()).shortcuts, storage.DEFAULT_SHORTCUTS);
+  areas.sync = { default: 'passed', Key: 'none', ShiftKey: 'bogus', prefixOpenMode: 'nowhere' };
+  const settings = await storage.loadSettings();
+  assert.deepEqual(settings.shortcuts, storage.DEFAULT_SHORTCUTS);
+  assert.equal(settings.prefixOpenMode, 'same');
 });
 
 test('setLink saves an optional name and removing the link removes it', async () => {
@@ -65,7 +67,7 @@ test('setLink saves an optional name and removing the link removes it', async ()
 });
 
 test('backups round-trip and reject bad values', async () => {
-  areas.sync = { default: 'passed', li_a: 'https://a.example/', name_a: 'A', theme: 'dark', ShiftKey: 'window', shortcutPrefix: 'Ctrl+Alt' };
+  areas.sync = { default: 'passed', li_a: 'https://a.example/', name_a: 'A', theme: 'dark', ShiftKey: 'window', shortcutPrefix: 'Ctrl+Alt', prefixOpenMode: 'inactive' };
   const backup = await storage.exportBackup();
   areas.sync = {};
   await storage.importBackup(backup);
@@ -75,6 +77,7 @@ test('backups round-trip and reject bad values', async () => {
   assert.equal(settings.theme, 'dark');
   assert.equal(settings.shortcuts.ShiftKey, 'window');
   assert.equal(settings.shortcutPrefix, 'Ctrl+Alt');
+  assert.equal(settings.prefixOpenMode, 'inactive');
 
   await storage.importBackup({
     app: 'keyboard-start-page',

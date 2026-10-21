@@ -18,7 +18,7 @@ Get it from the [Chrome Web Store](https://chromewebstore.google.com/detail/keyb
 - **Edit many links at once:** in settings, "Your links" lets you change names and addresses, add links, and remove several at once, then save them together.
 - **Wallpaper, theme and more:** click the gear in the bottom right corner.
 
-Chrome puts the cursor in the address bar on every new tab. Press <kbd>Tab</kbd> or click the page before pressing a key, or turn on **Focus the page on new tabs** in settings.
+Chrome puts the cursor in the address bar on every new tab. Press <kbd>Tab</kbd> or click the page before pressing a key, or turn on **Focus the page on new tabs** in settings. A short Help section at the top of settings covers the basics.
 
 ### Opening links
 

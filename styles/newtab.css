@@ -24,19 +24,7 @@ main {
   padding: 16px 64px;
 }
 
-.hint {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
-}
 
-/* Keep footer text readable on top of a photo. */
-.has-wallpaper .hint {
-  padding: 4px 12px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 85%, transparent);
-}
 
 .has-wallpaper #open-settings {
   background: color-mix(in srgb, var(--surface) 85%, transparent);

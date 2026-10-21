@@ -236,3 +236,19 @@ input[role="switch"] {
 .open-mode-select {
   width: 220px;
 }
+
+.help {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.links input[type="checkbox"],
+.select-all input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+}

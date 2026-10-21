@@ -34,7 +34,6 @@ export const DEFAULT_PREFERENCES = {
   theme: 'system', // 'system' | 'light' | 'dark'
   bgColor: null, // null means "use the theme's background"
   focusPage: false,
-  showHints: true,
   pageShortcuts: false, // "Open links from any page" is on
   prefixOpenMode: 'same', // where those links open: one of OPEN_MODES
   shortcutPrefix: 'Alt', // see src/prefix-shortcut.js for the format
@@ -92,7 +91,8 @@ async function migrate(raw) {
 
   const stale = [];
   if (typeof raw.bgColor === 'string' && raw.bgColor.toLowerCase() === LEGACY_DEFAULT_BG) stale.push('bgColor');
-  for (const name of ['defaultActions', ...LEGACY_CLICK_SETTINGS]) {
+  // showHints: the hint line on the new tab page was replaced by Help in settings.
+  for (const name of ['defaultActions', 'showHints', ...LEGACY_CLICK_SETTINGS]) {
     if (name in raw) stale.push(name);
   }
   if (stale.length) {
@@ -217,7 +217,7 @@ export async function importBackup(backup) {
   if (/^#[\da-f]{6}$/i.test(preferences.bgColor)) raw.bgColor = preferences.bgColor;
   // Same rule as parse() in prefix-shortcut.js: key codes joined by "+", with Ctrl, Alt or Meta.
   if (/^(?=.*\b(Ctrl|Alt|Meta)\b)[A-Za-z0-9+]+$/.test(preferences.shortcutPrefix)) raw.shortcutPrefix = preferences.shortcutPrefix;
-  for (const name of ['focusPage', 'showHints', 'pageShortcuts']) {
+  for (const name of ['focusPage', 'pageShortcuts']) {
     if (typeof preferences[name] === 'boolean') raw[name] = preferences[name];
   }
   await store.clear();

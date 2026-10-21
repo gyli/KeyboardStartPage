@@ -22,8 +22,6 @@ async function maybeTakeFocus() {
 
 function render() {
   applyTheme(settings);
-  document.getElementById('hint').hidden = !settings.showHints;
-  document.getElementById('focus-hint').hidden = location.search.includes('focus');
   keyboard.render(settings);
 }
 

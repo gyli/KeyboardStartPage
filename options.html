@@ -13,13 +13,20 @@
 <body>
   <header class="page-header">
     <img src="icons/icon-128.png" alt="" width="40" height="40">
-    <div>
-      <h1>Keyboard Start Page</h1>
-      <p>Changes are saved automatically, except in Your links.</p>
-    </div>
+    <h1>Keyboard Start Page</h1>
   </header>
 
   <main>
+    <section class="card">
+      <h2>Help</h2>
+      <ul class="help">
+        <li>Press a key on the new tab page to open its link, or click the key.</li>
+        <li>Click an empty key, or drop a link on it, to add a link. Hover a key and click the pencil to change it.</li>
+        <li>Chrome puts the cursor in the address bar on new tabs. If keys don’t respond, press <kbd>Tab</kbd> first, or turn on “Focus the page on new tabs” below.</li>
+        <li>Click the extension’s icon in the toolbar to open the keyboard over any page.</li>
+      </ul>
+    </section>
+
     <section class="card">
       <h2>Appearance</h2>
       <div class="field">
@@ -49,13 +56,6 @@
           <input id="wallpaper-file" type="file" accept="image/*" hidden>
         </div>
       </div>
-      <label class="field toggle">
-        <span>
-          <span class="field-label">Show hints</span>
-          <span class="description">Show a short help line under the keyboard.</span>
-        </span>
-        <input id="show-hints" type="checkbox" role="switch">
-      </label>
     </section>
 
     <section class="card">

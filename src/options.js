@@ -36,7 +36,6 @@ function render(settings) {
   document.querySelector(`input[name="theme"][value="${settings.theme}"]`).checked = true;
   $('bg-color').value = settings.bgColor ?? themeBackgroundHex();
   $('bg-reset').disabled = !settings.bgColor;
-  $('show-hints').checked = settings.showHints;
   $('focus-page').checked = settings.focusPage;
   for (const select of document.querySelectorAll('#shortcuts select')) {
     select.value = settings.shortcuts[select.dataset.trigger];
@@ -245,7 +244,6 @@ for (const radio of document.querySelectorAll('input[name="theme"]')) {
 }
 $('bg-color').addEventListener('change', (event) => save(setPreference('bgColor', event.target.value)));
 $('bg-reset').addEventListener('click', () => save(setPreference('bgColor', DEFAULT_PREFERENCES.bgColor)));
-$('show-hints').addEventListener('change', (event) => save(setPreference('showHints', event.target.checked)));
 $('focus-page').addEventListener('change', (event) => save(setPreference('focusPage', event.target.checked)));
 $('wallpaper-choose').addEventListener('click', () => $('wallpaper-file').click());
 $('wallpaper-file').addEventListener('change', (event) => {

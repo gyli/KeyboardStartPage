@@ -31,8 +31,8 @@ test('settings show saved values and save changes', async ({ seed, open }) => {
   await expect(page.getByLabel('Name for E')).toHaveValue('Example');
 
   await page.locator('select[data-trigger="Key"]').selectOption('active');
-  await page.getByRole('switch', { name: /Show hints/ }).uncheck();
-  expect(await storage(page)).toMatchObject({ Key: 'active', showHints: false });
+  await page.getByRole('switch', { name: /Focus the page on new tabs/ }).check();
+  expect(await storage(page)).toMatchObject({ Key: 'active', focusPage: true });
 });
 
 test('a chosen wallpaper is saved at full quality and can be removed', async ({ seed, open }) => {

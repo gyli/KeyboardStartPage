@@ -37,6 +37,15 @@ There is no build step, and the extension has no dependencies. Playwright is use
 
 Run `npm install` once, then `npm test`. Unit tests (`tests/unit`) use Node's built-in test runner. End-to-end tests (`tests/e2e`) load the extension into Chromium with Playwright. If Playwright asks for a browser, run `npx playwright install chromium`.
 
+GitHub Actions runs all tests on every push to `master` and on pull requests.
+
+### Releasing
+
+1. Bump `version` in `manifest.json` and commit.
+2. Tag and push: `git tag v1.2.0 && git push origin v1.2.0`. The tag must match the manifest version.
+3. GitHub Actions runs the tests, builds the zip and attaches it to a GitHub release with that name.
+4. Download the zip from the release and upload it to the Chrome Web Store.
+
 | Path | What it is |
 |---|---|
 | `newtab.html`, `src/newtab.js` | The new tab page |

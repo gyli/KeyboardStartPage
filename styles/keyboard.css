@@ -128,7 +128,8 @@
 }
 
 .key.bound:hover .key-edit,
-.key.bound:focus-within .key-edit {
+/* Only keyboard focus, so a key focused by a click or right-click doesn't keep the pencil. */
+.key.bound:has(:focus-visible) .key-edit {
   opacity: 1;
   translate: 0 3px;
 }

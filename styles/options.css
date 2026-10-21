@@ -245,10 +245,11 @@ input[role="switch"] {
   line-height: 1.7;
 }
 
+/* Chrome's normal checkbox size, the same for every row and Select all. */
 .links input[type="checkbox"],
 .select-all input {
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   margin: 0;
   accent-color: var(--accent);
 }

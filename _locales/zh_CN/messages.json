@@ -1,9 +1,0 @@
-{
-  "appName": {
-    "message": "Keyboard Start Page"
-  },
-  "appDesc": {
-    "message": "按一个键即可打开常用网站。可在新标签页使用，也可在任意页面通过快捷键打开。",
-    "description": "Store and extensions page description. 132 characters at most."
-  }
-}

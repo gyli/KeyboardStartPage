@@ -75,6 +75,8 @@ test('the shortcut prefix works on the new tab page too', async ({ site, seed, o
 test('pressing an empty key explains how to add a link', async ({ seed, open }) => {
   await seed({});
   const page = await open('newtab.html');
+  // Keys get their labels in the same step that starts listening for key presses.
+  await expect(page.getByRole('button', { name: 'K: add a link' })).toBeAttached();
   await page.keyboard.press('k');
   await expect(page.locator('#toast')).toHaveText(/K has no link yet/);
 });
